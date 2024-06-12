@@ -140,5 +140,11 @@ public class Main {
 
 //        boolean canBirdBreathe = Bird.canBreathe(); // accessing static method of an interface
 //        System.out.println(canBirdBreathe); // true
+
+//        PrivateInterfaceClass privateInterfaceObject = new PrivateInterfaceClass();
+//        privateInterfaceObject.canFly();
+//        System.out.println("------  calling interface default method");
+//        PrivateInterface.publicStaticMethod();
+
     }
 }

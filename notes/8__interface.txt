@@ -113,10 +113,10 @@ How to extend an interface that contains the default method
 Java 9 features
 
 
-- private methods can be provided inside an interface, these methods can NOT be accessed outside the interface
+- "private methods" can be provided inside an interface, these methods can NOT be accessed outside the interface
 - so what is the use ? - used when there are multiple default methods in an interface that share some common functionality, private methods can be used
 - private methods can be both "static" and "non-static", hence, `private` or `private static`
-
+- private non-static methods can access all kinds of methods and variables, but private static methods can only access static variables and static methods (both private and public)
 
 
 
