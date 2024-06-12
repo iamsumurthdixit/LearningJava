@@ -1,0 +1,190 @@
+Class Types:
+
+
+1. Concrete class
+
+- for which an object can be created using `new` keyword
+- has the implementations of ALL of its methods
+- it can be implemented from an interface OR extended from abstract class
+- Access modifiers -> public OR "package private" / default (skip to write access modifier)
+---------------------------------------------------------------------------------------------------
+
+2.  Abstract class
+
+- defined through `abstract` keyword
+- achieves 0 to 100 % abstraction as some methods can have implementations
+- cannot be used to create objects
+- child class can also be abstract (IMPORTANT)
+- when parent has some features that all child classes have in common, this can be used
+- constructors CAN be present in them and `super` child class will call the parameterized constructor
+
+VERY IMPORTANT NOTE: in java, a concrete/abstract class can extend a single [abstract] class and implement multiple interfaces at the same time:
+eg: public class A extends ParentClas implements Interface1, Interface2 {}
+here, ParentClass can either be concrete or abstract
+---------------------------------------------------------------------------------------------------
+
+3. Superclass and Subclass
+
+- parent is superclass and child is subclass
+- NOTE: in java, a parent class can store the reference of the child class, eg: Person obj = new Manager();
+- In java, EVERY class is a subclass of "Object" class ( VERY IMPORTANT )
+- hence, this is valid everywhere : Object audiCar = new Audi(34, 98);
+- and then, to know which car this object belongs to, use `.getClass()`
+- System.out.println(audiCar.getClass());
+---------------------------------------------------------------------------------------------------
+
+4. Nested class ( VERY IMPORTANT )
+
+- class within another class
+- 2 types:
+    -> static
+    -> non-static ( inner class ) : 3 types :
+        => member inner class
+        => local inner class
+        => anonymous inner class
+
+- when to use nested class ?
+- when you know some class A is ONLY going to be used some other class B. hence, instead of creating another file for it, define it in the same class.
+- the scope of the nested class is same as the Outer class
+------------------------------------------------------------
+
+Static Nested Class
+
+- it does NOT have access to the non-static data, methods of the outer class
+- object of the outer class is NOT required to invoke a method of static nested class
+- it can be private / protected / public / default
+- see OuterClassPrivate and OuterClassPublic
+------------------------------------------------------------
+
+Non-Static Nested Class OR `Inner Class`
+
+- it has access to ALL the (instance and static) variables and methods of the outer class
+- it's object CAN BE initiated on AFTER the initiating the object of the outer class
+
+3 types:
+
+
+A. Member Inner class
+
+- it can be private / public / protected / default
+- see OuterClassMember
+
+B. Local Inner class
+
+- defined within block scopes only (for, while, if etc.)
+- MUST be default
+- object can be created within that block scope only
+- see OuterClassLocal
+
+
+NOTE: inheritance of nested classes is possible for both static and non-static inner classes, it is extremely rarely used, so skipping it
+
+
+C. Anonymous Inner class
+
+- an inner class without a name
+- when it is used ? ( VERY IMPORANT )
+- to override a method WITHOUT creating a subclass
+- see AnonymousClass
+---------------------------------------------------------------------------------------------------
+
+
+5. Generic class
+
+- diamond syntax <T>
+- `T` can be ANY NON-PRIMITIVE data type
+
+
+Inheritance with generic class
+- child class can be BOTH generic and non-generic
+- see ColorGeneric , ColorNonGeneric
+
+
+Generic method in a non-generic class:
+- Type parameter MUST be before the return type of the method declaration
+- Type parameter scope is limited to method only
+
+
+Upper Bound generics:
+- to limit the number of datatypes method/class will accept
+- eg: <T extends Number>, now T can only have Number and its subclasses (Integer, Float, Double etc.)
+eg: public class Print(T extends Number) {}
+
+
+Multi bound generics:
+- to replicate the situation like "public class A extends ParentClass implements Interface1, Interface2"
+- public class Print<T extends ParentClass & Interface1 & Interface2> {}
+- here, the first must be a class ( and exactly 1 ) , followed by any number of interfaces
+
+NOTE: there are wildcards also, skipping it
+
+NOTE: Although in java you can store the reference of child object in parent object like Car car = new Audi(); but this is NOT possible by default: List<Car> carList = new ArrayList<>(); List<Audi> audiList = new ArrayList<>(); then assignment of the child class list to parent class list is not possible : WRONG- carList = audiList;
+- to overcome this situation, wildcards are used
+---------------------------------------------------------------------------------------------------
+
+
+6. POJO Class ( Plain Old Java Object )
+
+- plain old java object
+- ONLY `public` class
+- contains variables and its getter and setter methods
+- should NOT extend any other class and NOT implement any other interface
+- NO annotations should be present on any variable or method
+---------------------------------------------------------------------------------------------------
+
+
+7. ENUM Class
+
+- it has collection of constants
+- since, constants in java class are declared using "static final", but here, in enum, constants are IMPLICITLY static final
+- written using "enum" keyword instead of class
+- can NOT extend any class, because it implicitly extends java.lang.Enum class, and in java, 1 class can only extend 1 class
+- it can implement ANY number of interfaces
+- it can have variables, constructors, methods
+- it can NOT be instantiated, because it's constructor is ALWAYS `private`
+- NO other class can extend it
+- it can have abstract method and ALL constants should implement that abstract method (VERY IMPORTANT)
+- public enum MyEnum { A, B, C; }  // syntax is important
+- .values() will give the list of enums present: MyEnum.values() = [A, B, C]
+- .ordinal() will give the value assigned to that enum var, (0-based indexing):
+- .valueOf() will give the value assigned to that enum var represented as raw String, like MyEnum.valueOf("A") => A
+- .name() will give the name assigned to that var : MyEnum.name("C") => C
+- ALL the methods in enum MUST be `static` since enum class cannot be instantiated
+- EnumCustom enumCustomVar = EnumCustom.SUNDAY; here, enumCustomVar is an enum instance (a constant created by JVM) which is NOT created using the `new` keyword
+
+- benefit of using enum over using static final constants inside a clas ?
+- improves readability
+---------------------------------------------------------------------------------------------------
+
+
+8. Final class
+
+- can NOT be inherited
+---------------------------------------------------------------------------------------------------
+
+
+9. Singleton Class:
+
+- to create ONLY 1 object (eg: DbConnection object)
+- create a "private static object" within class so that it cannot be accessed from outside class and static because it becomes attached to class, no matter how many instances of this class are created outside, every object will share this single private object only
+- create "private constructor" of the class so that it cannot be instantiated from outside the class
+- hence, expose a public method to return this private static object
+
+Types:
+
+- Eager initialization
+- Lazy initialization
+- Synchronized block
+- Double check lock ( memory issue, solved through volatile instance )
+- Bill Pugh solution
+- Enum solution
+---------------------------------------------------------------------------------------------------
+
+
+10. Immutable class:
+
+- can NOT change the value of the object once the data members are initialized using constructor
+- the class must be `final`, no subclass can exist
+- ALL the data members should be private
+- ONLY getter methods are present, NO setter method
+- ( IMPORTANT ): for data members of type collections ( like list ), ALWAYS return the copy of the data variable, we are allowed to change value of the list (similar) objects in our calling method, but INSIDE the final class, the reference to the list object once initialized SHOULD NEVER change, hence, always return a copy

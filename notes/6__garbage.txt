@@ -1,0 +1,45 @@
+Memory management and Garbage collector
+
+- 2 types of memory: STACK, HEAP
+- both are created and managed by JVM
+
+
+1. Stack memory:
+
+- stores temporary variables and separate memory block for methods
+- stores primitive data types
+- stores reference of the heap objects: object is created using `new` inside the heap memory but the reference to that location in heap is stored in stack (in the variable name)
+- EACH thread has its own stack, but all share a single heap
+- variables within a SCOPE is only visible and as soon as the scope is finished, those variables are removed from the stack
+- when stack memory gets full, java.lang.StackOverflow exception
+---------------------------------------------------------------------------------------------------
+
+Role of garbage collector:
+
+- frees up the objects from the heap for which there is no reference in the stack
+- this happens when the scope goes out in stack and their reference is removed.
+- GC runs periodically is completely managed by JVM
+---------------------------------------------------------------------------------------------------
+
+3 kinds of reference from (variables in) stack to the objects present in heap:
+
+1.  Strong reference: (MOSTLY USED)
+eg: Person person = new Person();
+- here, person will store the strong reference from stack to heap object, when GC run, and it sees a strong reference, it will NOT remove the object from heap
+
+2. Weak reference:
+- when this is used, we can access the value of the object present in heap from stack reference variable until GC is not run. when GC runs, it removes the object from heap and then if try to access the object, we will get NULL.
+
+3. Soft reference:
+- same like weak reference, but implies that GC removes the object only when there is NO other option to allocate new object in heap
+---------------------------------------------------------------------------------------------------
+
+2. Heap memory:
+
+- stores objects
+- no fixed order of allocating the memory
+- GC is used to delete the unreferenced objects from heap
+- Mark & Sweep algorithm
+- heap memory is shared among all threads
+- it also contains the "string constant pool"
+- when it goes full, "java.lang.OutofMemoryError"

@@ -1,0 +1,79 @@
+each object has both "data variables" and "data methods"
+
+
+1. DATA ABSTRACTION 
+- hides the internal implementation
+- shows only essential functionality to user
+- achieved through "interfaces" and "abstract classes"
+
+advantages: 
+- increased security and confidentiality
+- simplifies the client code, client does not know what is happening internally
+
+
+
+2. DATA ENCAPSULATION 
+- bundles the "data" and code working on that data "functions" in a "single unit"
+- also knows as DATA-HIDING
+
+advantages: 
+- loosely coupled code: the class takes the full ownership of modifying the data attributes through its functions, hence, more control over the data, hence, if something within this class gets changed, it will not impact the working within another class which calls this
+
+
+3. INHERITANCE
+- capability of a class to inherit properities(data, function) of the parent
+- 4 types: 
+	- single : A -> B
+	- multilevel : A -> B -> C
+	- hierarichal : A -> B, A -> C
+	- multiple : acheived through interface only 
+
+advantages: 
+- code reusability
+- we can achieve polymorphism through this 
+
+
+4. POLYMORPHISM 
+- same method behaves differently in different situations
+
+- 2 types: 
+
+- compile time / static / method overloading: 
+- occurs in the same class only
+- the return type of 2 methods may / may not be same 
+- the number of arguments OR/AND the data type of arguments MUST differ. if the number of arguments and their type is same, but the reutrn tyep of the methods is different, it will ERROR, because java will not know at compile time which method to call
+
+- runtime / dynamic / method overriding: 
+- occurs in different class which are inherited 
+- method return type, number and type of arguments MUST EXACTLY match
+- only the internal implementation differs
+- how it is runtime: it depends on the class whose object is used to call the method, if it is the child class, then mehthod of the child class will be used, and if it is parent class object, then parent class object will be used. it is simply "overriding" the method in child class
+
+
+-----------------------------------------------------------------------------------------------
+
+OBJECT RELATIONSHIPS : talked in terms of objects only
+
+
+1. Is-a Relationship: 
+- 100% times it means simple inheritance only
+- achieved through inheritance of child from a parent  
+- eg: Dog is an Animal 
+
+
+2. Has-a Relationship:
+- whenever an object of another class is used as data member of some class
+- it can be one-one, one-many, many-many
+- eg: School has Students, Bike has Engine 
+
+
+- Association in Has-a is of 2 types: 
+
+2A. AGGREGATION (weak relationship): 
+- both "objects" can survive individually. 
+- when ending of 1 object will not end other object 
+eg: if School objects has a data attribute List<Student> students, then if students is removed, School object will still remain 
+
+2B. COMPOSITION (strong relationship):
+- ending of 1 object will end other object
+eg: if School object has List<Classroom> classrooms, and if School object is removed, then those classrooms will not exist. 

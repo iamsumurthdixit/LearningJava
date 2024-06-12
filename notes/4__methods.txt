@@ -1,0 +1,79 @@
+how to declare a method:
+
+public int sum(int a, int b) throws Exception {
+}
+---------------------------------------------------------------------------------------------------
+
+Access Specifiers
+
+1. public:
+- can be accessed through any class in any package (collection of similar classes)
+
+2. private:
+- can be access in the same class in which it is defined
+
+3. protected:
+- can be accessed in all the classes within same package
+- can be accessed in (child) subclasses in different package
+
+4. default OR "package-private (only said verbally)":
+- when no access specifier is mentioned
+- can be accessed in all the classes within same package
+---------------------------------------------------------------------------------------------------
+
+
+Types of methods 
+
+
+1. system defined methods 
+- already defined and ready to use, Math.sqrt()
+
+
+2. user defined methods
+
+
+3. overloaded methods 
+- more than 1 method with same name created in same class 
+- differentiated on the basis of arguments
+- do not consider return type of the methods
+
+
+4. overridden methods
+- subclass has exactly same method in parent class
+- dynamic binding eg;
+    Person obj = new Doctor();
+    obj.getProfession();
+    obj.getPerson();
+decided at runtime that obj is an instance of Doctor, so first it will search for the existence of getProfession() in Doctor class, for getPerson(), it is not present in t Doctor, so it is called from Person class
+
+
+5. static methods ( VERY IMPORTANT )
+- associated with class
+- called with class name
+- shared across all objects
+- static methods cannot call non-static methods and data variables, because static methods are associated with class, non-static are associated with objects. then static method will now know which object to use to call methods and data. only if you create an object of the class within the static method, only then you can access them. see Calculation class.
+- static happens at compile time, hence overriding static methods "hides" the parent static method. then both child and parent classes can call their static methods using respective class names. and hence, this happens at compile time only. @Override will give error in child class if done so. see Doctor, Person
+
+-> when to declare a method static ? ( VERY IMPORTANT )
+- when the method "does not use any instance variable", ONLY works with the arguments passed to it
+- used as a kind of utility that does some computation and returns the result
+eg: factory design pattern
+
+
+
+6. final method
+- when you don't want the implementation to be changed
+- you cannot override the method in any child class, hence it is final
+
+
+8. abstract method
+- defined ONLY in "abstract class"
+- only method declaration is done
+- child class write the implementation
+---------------------------------------------------------------------------------------------------
+
+Variable number of arguments to a function
+
+- syntax:=> ...variable
+- must be the last argument in the method
+- treats the variable as a list

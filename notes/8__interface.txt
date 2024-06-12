@@ -1,0 +1,149 @@
+Interface
+
+
+- access modifiers allowed : `public` and `default`
+- interface can NEVER be private or protected
+- CAN extend ANY number of interfaces using "extends" keyword and comma separated parent interfaces
+- can NEVER be used to form objects
+- all the methods in an interface are abstract methods (methods with only signatures)
+---------------------------------------------------------------------------------------------------
+
+- Need of interface:
+
+
+1. Abstraction:
+- can achieve 100% abstraction by specifying WHAT a class must do and NOT showing HOW it should do
+
+
+2. Runtime polymorphism ( Can be used as a data type ):
+- since parent class in java can hold the reference of the child class objects, interface name can be used as datatype to hold the reference of the concrete child class objects, so at runtime, it decides which method to call based on the object of which class it is
+
+eg: Bird bird1 = new Hen(); Bird bird2 = new crow(); here, Bird is interface
+
+
+3. Multiple inheritance ( VERY IMPORTANT )
+- resolves the diamond problem, what is this ?
+- diamond problem: when 2 parent class have exactly same method signature, then "suppose", if we could create a child class extending from both, then compiler will now know which implementation to call from the child object. hence, this thing is not allowed in java
+
+- using interface, we only give the "method signatures", the implementing class has to give its OWN implementation of the method, so multiple interfaces can have same method signatures, and the implementing class will provide its own implementation of that method
+---------------------------------------------------------------------------------------------------
+
+
+Some VERY IMPORTANT points:
+
+1. interface can either be "public" or "default"
+
+2. ALL the method in interface are "public" implicitly
+- so, in an interface, both of the below are exactly same
+int getId(); and
+public int getId();
+
+3. interface methods can NEVER be private or protected
+
+4. NO method can be declared as "final" in an interface, because it means, method can not be overridden, but interface methods are always to be overridden
+
+5. ALL the fields ( data members ) are public CONSTANT (static final) only implicitly.
+- each data field is `public static final` only, so both are same:
+int MAX_HEIGHT = 200;
+public static final int MAX_HEIGHT = 200;
+
+6. NONE of the fields can be private or protected (public is enforced by compiler)
+
+
+TLDR:
+- NOTHING in an interface can be private or protected
+- EVERY data field is a public constant (public static final)
+---------------------------------------------------------------------------------------------------
+
+
+Interface implementation:
+
+1. A concrete class MUST provide all the implementations of the methods
+
+2. An "abstract" class CAN also implement ANY number of interfaces and, it can provide implementation of NONE/SOME/ALL methods. but the concrete class extending this abstract class MUST provide the implementation of all the methods that are not defined yet
+
+3. 1 interface can extend another interface using "extends" keyword
+---------------------------------------------------------------------------------------------------
+
+
+Nested interface:
+
+1. if within an interface: MUST be public
+2. if within a class: can be private, protected, public or default
+
+// skipping the rest from this part
+---------------------------------------------------------------------------------------------------
+
+
+Some difference b/w abstract class and interface:
+
+1. variables in abstract class can static / non-static / final / non-final
+but in interface, all are public static final implicitly
+
+2. methods in abstract class can be public / private / protected / default.
+but in interface, all the methods are public implicitly
+
+3. abstract class CAN have a constructor, interface CANNOT have a constructor
+
+4. `abstract` is used in abstract class to make a method abstract along with access modifier, in interface, all methods are implicitly abstract public
+---------------------------------------------------------------------------------------------------
+
+
+Java 8 interface features:
+
+
+1. default method:
+- this method can be implemented inside the interface itself and, it will be present in the class implementing that interface
+- so, it removes the overhead of writing SAME implementation across ALL classes implementing it
+
+NOTE: problem of having multiple interfaces having exactly same default method signature:
+
+- when a class is implementing more than 1 interface where some default method has exactly same signature, (again a diamond problem), then, the class has to provide its OWN implementation of the default method
+- see MultipleInterface class
+---------------------------------------------------------------------------------------------------
+
+
+How to extend an interface that contains the default method
+
+
+- check BirdChild interface
+---------------------------------------------------------------------------------------------------
+
+
+Java 9 features
+
+
+- private methods can be provided inside an interface, these methods can NOT be accessed outside the interface
+- so what is the use ? - used when there are multiple default methods in an interface that share some common functionality, private methods can be used
+- private methods can be both "static" and "non-static", hence, `private` or `private static`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

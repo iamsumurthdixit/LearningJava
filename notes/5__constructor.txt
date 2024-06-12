@@ -1,0 +1,64 @@
+constructor:
+- creates an instance of the class
+- must be same as the classname
+- can NOT be abstract, final, static or synchronized
+- must not have a return type
+
+
+Some general points about constructor :
+
+
+- new keyword in java is used to call the constructor
+- any method in java class can have exactly same name as the class name
+- hence, new calls the constructor only
+
+- constructor cannot be final because it can not be overridden in any child class, hence, no use
+- child class does not have the access of the constructor of the parent class
+
+- why constructor cannot be abstract ? - because for abstract, child class has to provide the implementation, now in java, child class can NOT inherit the constructor, so how implementation will be done, so constructor cannot be abstract
+
+- why constructor cannot be static ? - see constructor is a kind of method that initializes instance variables, and any static method can make use of static variables and methods, it does not know about which object to use in order to modify the instance variables, hence, constructor cannot be static. also, it will now allow constructor chaining
+
+- why constructor is not for interface ? constructor is required to create instances, interface cannot have any instance, only implementing child will have the instance, so there is no need of constructor in interface
+
+- constructor can NOT be overridden due to naming problems in child classes
+
+---------------------------------------------------------------------------------------------------
+
+Types of Constructor
+
+
+1. Default
+- created by java when no constructor is written, when you compile .java file
+- initializes all the instance variables to their default values, eg: for String -> null
+- called when the `new` keyword is seen
+
+NOTE: Default constructor is ONLY added by java when no constructor is written. If any constructor is written, java will not add the default constructor
+
+2. No-Args
+- written explicitly and does NOT take any argument
+
+3. Parameterized
+- takes arguments
+
+4. Overloading constructor
+- same constructor name, different arguments
+
+5. Private constructor ( IMPORTANT, used in singleton )
+- when constructor is private, NO instance can be created outside this class
+- class itself takes the responsibility of creating and returning an instance through a static method, why static method ? because instance can not be created using `new` keyword
+---------------------------------------------------------------------------------------------------
+
+
+Constructor chaining
+
+2 types: this, super
+
+1. this:
+- happens in same class only
+- multiple constructors can call another using `this` keyword
+
+2. super:
+- in parent-child class
+- in any child class constructor, the first line is a call to super() to invoke parent's constructor. this is done by default by java, ONLY when the parent class constructor is a "No-Arg" constructor.
+- if the parent class takes some argument, then the first line in the child class constructor should be a call to super(arg1, arg2,...); to initialize the parent class first, and then initialize the child class constructor, and in this case, the child class takes all the arguments needed to initialize its own constructor and its parent constructor

@@ -1,0 +1,279 @@
+2 types of data: 
+
+1. primitive: 
+(below are integral) 
+- char
+- byte
+- short
+- int
+- long
+(below are fractional) 
+- float
+- double
+(this is boolean)
+- boolean 
+
+
+2. non-primitive / reference types
+- class
+- interface 
+- Array
+- String 
+
+
+---------------------------------------------------------------------------------------------------
+
+
+Primitive data types: 
+
+1. char ( 2 bytes ) 
+- ASCII value
+- char val = 'A'; or char val = 97; 
+
+2. byte ( 1 byte ) 
+- signed 2's complement 
+- -128 to 127
+
+3. short (int) ( 4 bytes )
+4. long ( 8 bytes )
+
+5. float ( 4 bytes ) 
+- float val = 73.98f; 
+
+6. double ( 8 bytes ) 
+- double val = 9734.903d; 
+
+7. boolean ( 1 bit ), default is false; 
+- boolean val = true; 
+
+
+---------------------------------------------------------------------------------------------------
+
+
+Types of conversion :- 
+
+1. Widening / Automatic conversion
+
+int val = 35; 
+long bigVal = val; (automatic) 
+
+
+2. Downcasting / Explicit conversion
+- beware of ranges
+
+int val = 34; 
+byte newval = (byte) val; 
+
+
+3. Promotion 
+- used in expressions 
+
+byte a = 127; 
+byte b = 1; 
+
+byte c = a + b; // c = -128 (rotation after exceeding limits) 
+
+int d = a + b; // d = 128 (PROMOTION) 
+
+- in an expression, if multiple data types are present, by default the result becomes the type of the largest datatype. 
+
+eg: 
+int a = 34; 
+double b = 398.98d; 
+
+double c = a + b; // result automatically becomes double 
+
+int d = (int) (a + b); // explicit typecasting to form int 
+
+
+---------------------------------------------------------------------------------------------------
+
+
+Types of variables:- 
+
+public class Employee {
+	int memberVariable; // member variable 
+	static int staticVariable; // static variable OR class variable 
+	
+	Employee() {
+		
+	}
+	
+	// parameterized constructor
+	Employee(int a) {
+		
+	}
+	
+	public void dummyMethod() {
+		byte localVariable = 100; // local variable 
+	}
+	
+	// method parameter 
+	public int dummyMethod2(int a, int b) {
+		return a + b; 
+	}
+}
+
+1. Local 
+
+2. Instance / member variables
+- present in the objects, accessed after creating the object 
+
+3. class / static  variables:- 
+- only 1 copy present across all objects, cannot be accessed through objects, accessed only through class names
+
+---------------------------------------------------------------------------------------------------
+
+
+Reference / Non-primitive data types
+
+why is it called reference ? 
+- when you write Employee newEmployee = new Employee(); then memory is allocated for this object on HEAP and the variable newEmployee holds the reference to that memory location in heap. Also, when you pass this variable newEmployee into some method like private static void modify(Employee employee) {}, then this argument varibale employee also holds the reference to memory in heap. so any change inside this method will be reflected in other methods as wel. (entire concept of pointers acheived through reference) 
+
+
+NOTE: Unlike C++, there is NO concept of "pass by reference" in java, in c++ it is achieved using pointers. in "java everything is pass by value"
+
+
+
+1. Class : discussed above
+
+
+2. String : 
+
+- 2 components in strings = immutable, string literal
+- when string is created like String s1 = "hello", String s2 = "hello", then this "hello" part is called string literal and this is created on heap in a space called "String constant pool". 
+- in string constant pool, only 1 instance of "hello" will be created and both s1, s2 will have a reference to its memory in heap.
+- so if you do s1==s2, it will be true, because both s1, s2 point to the same memory location in SCP in heap. also, s1.equals(s2) will be true which matches the value
+- if you do now s1 = "bye"; this will create a new string inside SCP in heap and point s1 to its reference, now both s1==s2 and s1.equals(s2) will be false
+- if you write String s3 = new String("hello"); then this s3 is a normal String object which is present in heap OUTSIDE scp. So, s3 will have the reference of the memory location of this object. here, s2.equals(s3) will be true (value match) but s2==s3 will be false, becuase s3 is outside scp, s2 is inside scp (due to formation by string literal)
+
+
+
+3. Interface : 
+
+public interface Person {
+	public String profession(); 
+}
+
+public class Engineer implements Person {
+	@Override
+	public String profession() {
+		return "engineer"; 
+	}
+}
+
+public class Teacher implements Person {
+	@Override
+	public String profession() {
+		return "teacher"; 
+	}
+}
+
+- all the child classes MUST override all the methods of the parent interface
+- interface cannot be used to create an object, i.e., new Person(); this is wrong
+
+- 4 valid ways here, 
+
+Engineer engineer = new Engineer();   // valid 
+Teacher teacher = new Teacher();      // valid 
+
+Person engineer = new Engineer();   // valid 
+Person teacher = new Teacher();      // valid 
+
+- above 2 statements are valid because a parent class/interface can hold the memory reference to the object in heap from their child classes. 
+
+But this is wrong:- Engineer engineer = new Person(); // ERROR
+
+
+
+4. Array : 
+
+- int[] arr = new int [5]; 
+or int arr[] = new int [5]; 
+or int arr[] = { 1, 2, 3, 4, 5 }; 
+
+NOTE: int[5] arr = new int [5]; // ERROR
+
+- int[][] brr = new int [5][4]; 
+or int brr[][] = new int [5][4]; 
+or int brr [][] = { {1, 2, 3}, {2, 4, 5} }; 
+
+---------------------------------------------------------------------------------------------------
+
+
+Wrapper Classes 
+
+
+- 1 wrapper class for each primitive data type
+int - Integer
+char - Character
+short - Short
+byte - Byte
+long - Long
+boolean - Boolean 
+float - Float
+double - Double 
+
+- NEED: 
+- primitive data types are allocated memory on stack, so when a primitive data type is passed to another method and that method tries to change its value, the changed value will NOT get reflected in the calling method scope. because, in such case, the new memory for the argument of the method created on stack got cleaned up when control returned to calling method, hence, no change in the value of the primitive type variable 
+
+- wrapper class create objects on heap and the variable holds the memory reference to it. so when that variable is passed to another method, the modified value is reflected because it is directly changed in heap.
+
+- Collections library only works with Wrapper classes, not primitives. 
+
+- 2 kinds here: 
+
+- Autoboxing : primitive to wrapper class: 
+int a = 34; 
+Integer wa = a; 
+
+- Unboxing : wrapper to primitive 
+Integer wb = 978; 
+int b = wb; 
+
+---------------------------------------------------------------------------------------------------
+
+
+
+Constant variables (static final)
+
+- written in upper case letters
+
+
+1. Class level constants
+- MUST be `static final`
+- here, order does not matter, static final OR final static, both are same 
+- accessed using class name
+- each object will refer to a single copy of such constant
+
+
+2. Instance level constants
+- MUST be  `final` to be instance level constant
+- declared in class, outside all methods 
+- accessed using object only
+- can be written using parametrized constructor
+- each object will have its own DEPT_ID, although same in value
+
+
+3. Local constants 
+- `final` in a method
+
+
+public class Employee {
+    static final int EMP_ID = 34; // Class-level constant
+    final int DEPT_ID = 8; // Instance-level constant
+
+    public static void main(String[] args) {
+        final int ID = 87; // Local constant within the main method
+        
+        // Accessing the class-level constant
+        System.out.println(EMP_ID); 
+        
+        // Creating an instance of Employee to access the instance-level constant
+        Employee emp = new Employee(); 
+        System.out.println(emp.DEPT_ID); 
+        
+        // Accessing the local constant
+        System.out.println(ID); 
+    }
+}
