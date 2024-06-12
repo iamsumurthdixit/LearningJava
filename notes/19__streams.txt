@@ -1,0 +1,253 @@
+Collections - Streams
+
+
+- kind of pipeline through which collection elements will pass
+- ability to add intermediate operations like sorting, filtering etc.
+- useful for bulk processing ( can do parallel processing )
+- does NOT impact the original datasource
+- often Collectors class methods are used as terminal operations like .collect()
+- toArray() in Stream interface is also a terminal operation
+
+
+
+NOTE: apart from Stream interface, IntStream, DoubleStream and LongStream interfaces exist to work with primitives. All these are child interfaces of BaseStream
+
+
+General execution of a stream:
+
+Step 1: Create Stream
+- stream created from the data source like collections.
+- eg : - .stream() is applied to the collection object
+
+Step 2: Intermediate operations
+- apply one or more operations on top of another like filtering, sorting, etc.
+- EVERY intermediate operation `transforms` the stream to another (new) stream based on result
+- these operations are `lazy` in nature, i.e., only execute when a terminal operation is invoked
+
+Step 3: Terminal operation
+- ONLY 1 terminal operation can be applied to a stream
+- triggers the processing of the stream (intermediate operations in order they were applied)
+- closes the stream and outputs the result into a new collection without modifying the source collection
+- eg: collect(), reduce(), count() etc.
+---------------------------------------------------------------------------------------------------
+
+
+Different ways to create a stream
+
+
+1. from Collection : .stream()
+    List<Integer> numList = new ArrayList<>();
+    Stream<Integer> numStream = numList.stream();
+
+2. from Array : Arrays.stream()
+    Integer[] array = new Integer[]{1, 2, 3, 4};
+    Stream<Integer> arrayStream = Arrays.stream(array);
+
+3. from static method : Stream.of()
+   - it internally calls Arrays.stream() because of variable arguments in of()
+   Stream<Integer> arrayStream = Stream.of(1,2,3,4,5,6);
+
+4. from stream builder
+   - keep calling .add() and then finally call .build()
+   - Builder is a nested interface inside Stream interface, hence static.
+   - Builder extends Consumer @FunctionalInterface and overrides .accept() by .add()
+   - actual implementation of .build() is provided in final class Streams
+
+    Stream.Builder<Integer> streamBuilder = Stream.builder();
+    streamBuilder.add(1).add(2).add(3).add(4).add(5).add(6);
+    System.out.println(streamBuilder.build().count()); // 6
+
+5. from stream iterate
+    - works like for loop, seed (starting), increment (lambda func), limit (required because infinite by default)
+    Stream<Integer> streamFromIterate = Stream.iterate(500, value -> value + 1).limit(5);
+---------------------------------------------------------------------------------------------------
+
+
+Intermediate operations: all these operations work on the elements and add each element one by one to downstream
+
+
+1. filter (Predicate<T> predicate): filters the element
+
+Stream<String> nameStream = Stream.of("hello", "hi", "how");
+Stream<String> filteredStream = nameStream.filter((String name) -> name.length() < 3);
+List<String> filteredOutput = filteredStream.toList(); // output will not be of Stream, just like in builder pattern
+System.out.println(filteredOutput); // [hi]
+
+
+2. map(Function<T, R> mapper) : used to transform each element
+
+Stream<String> capitalNamesStream = nameStream.map(String::toUpperCase); // optimized method reference
+
+
+3. flatMap(Function<T, Stream<R>> mapper): used to iterate over each element of the complex collection, and helps to flatten it
+
+List<List<String>> sentenceList = Arrays.asList(
+    Arrays.asList("a", "b", "c"),
+    Arrays.asList("d", "e", "f"),
+    Arrays.asList("g", "h", "i")
+);
+Stream<String> wordStream = sentenceList
+    .stream()
+    .flatMap((List<String> sentence) -> sentence.stream()).map(String::toUpperCase);
+System.out.println(wordStream.toList()); // [A, B, C, D, E, F, G, H, I]
+
+
+4. distinct() : removes duplicate from stream
+
+5. sorted() : sorts the elements
+
+Integer[] arr = {1,2,3,4,54,3,21,8,47,82,98};
+System.out.println(Arrays.stream(arr).sorted((a, b) -> b - a).toList());
+
+6. peek(Consumer<T> action) : helps you to see the "intermediate result" of stream which is getting processed
+
+List<Integer> numbers = Arrays.asList(3,2,1,4);
+Stream<Integer> numberStream = numbers.stream()
+    .filter(val-> val > 2)
+    .peek(System.out::println) // 3 4
+    .map(val -> -1 * val);
+System.out.println(numberStream.collect(Collectors.toList())); // [-3, -4]
+
+
+7. limit(long maxSize) : limits the stream up to first maxSize items only
+
+8. skip(long n) : skips the min(first n, total) items from the stream
+
+9. mapToInt(ToIntFunction<T> mapper): returns IntStream, helps to work with primitive int
+
+List<String> numbers = Arrays.asList("2", "1", "4", "7");
+
+// SITUATION 1
+Stream<Integer> numberStream = numbers.stream().map(Integer::parseInt);
+System.out.println(Arrays.toString(numberStream.toArray())); // [2, 1, 4, 7]
+
+- Here, using general map() defined in Stream interface, it returns a Stream. Stream works only with objects and not primitives. Hence, even though parseInt return `int`, java does Autoboxing on to convert it to Integer because map() in Stream interface has to return a Stream of objects.
+- So, when the requirement is to work with Integer objects, prefer this.
+
+
+// SITUATION 2
+IntStream numberStream = numbers.stream().mapToInt(Integer::parseInt);
+int[] outputArray = numberStream.toArray();
+System.out.println(Arrays.toString(outputArray));
+
+- here, the mapToInt in Stream returns IntStream, a special kind of Stream for working with primitive `int`. it reduces the overhead of autoboxing and in cases can be a performance boost when to work with methods revolving around int like sum(), average() etc.
+
+10. mapToDouble
+
+11. mapToLong
+---------------------------------------------------------------------------------------------------
+
+NOTE: without any terminal operation, peek(println) will not work. because the stream processing ONLY takes place when terminal operation is invoked. hence, intermediate operations are lazy
+---------------------------------------------------------------------------------------------------
+
+
+Sequence of Stream operations
+
+List<Integer> numbers = Arrays.asList(2, 1, 4, 7, 10);
+Stream<Integer> numberStream = numbers.stream()
+    .filter(val -> val > 3)
+    .peek(val -> System.out.println("after filter: " + val))
+    .map(val -> val * -1)
+    .peek(val -> System.out.println("after map: " + val))
+    .sorted()
+    .peek(val -> System.out.println("after sorted: " + val));
+System.out.println(numberStream.collect(Collectors.toList()));
+
+OUTPUT:
+after filter: 4
+after map: -4
+after filter: 7
+after map: -7
+after filter: 10
+after map: -10
+after sorted: -10
+after sorted: -7
+after sorted: -4
+[-10, -7, -4]
+
+
+- operations like filter(), map(), peek() that do NOT require to see the entire stream upfront, take an element one-by-one, apply their effect and pass on to the next intermediate operation.
+- stateful operations like sorted(), distinct() require to see all the elements in stream. hence, these operations need to buffer all elements in stream. so these elements only pass the elements downstream unless they have seen all the stream elements and applied their effect
+- this offers benefits like finding any() from a large dataset
+---------------------------------------------------------------------------------------------------
+
+
+Terminal operations
+
+- trigger processing of the stream, produce result, closes the stream pipeline
+
+1. forEach(Consumer<T> action)
+
+- performs action on each element of the stream, does not return anything
+- kind of "terminal peek"
+numbers.stream().forEach(val -> System.out.println(val));
+
+
+2. toArray() : collects the elements of stream into an array
+- by default return Object[]
+- if a specific type is required, pass a lambda to create a desired size array of a type
+
+Integer[] numbers = Stream.of(1,2,3,4,5,6,7,8).toArray((int size) -> new Integer[size]);
+
+
+3. reduce(BinaryOperator<T> accumulator)
+- does associative reduction on the elements of the stream. Performs associative aggregation function
+- Stream has 3 signatures for reduce(). this particular takes a BiFunction and returns Optional
+
+Optional<Integer> numbers = Stream.of(1,2,3,4).reduce((Integer a, Integer b) → a + 2 * b);
+numbers.ifPresent(System.out::println);
+
+- .ifPresent(), .get() and .isPresent() are methods on Optional wrapper class
+
+
+4. collect (Collector<T, A, R> collector)
+- collects the stream items into a list
+
+5. min (Comparator<T> comparator) and max (Comparator<T> comparator)
+- find min and max from stream based on the comparator provided
+- specific case of reduction, returns Optional, because stream can also be empty
+
+Optional<Integer> numbers = Stream.of(1,2,3,4).min((a, b) -> b - a);
+System.out.println(numbers.get());
+
+
+6. count() : returns the count
+
+7. anyMatch(Predicate<T> predicate)
+- check if any value in the stream matches the given value and return true / false
+- obviously predicate is a lambda expression due to Predicate being F.I.
+
+boolean isTenPresent = Stream.of(1,2,3,5,10,34).anyMatch(a -> a == 10);
+
+- allMatch(), noneMatch() also
+
+
+8. findFirst()
+- finds the first element of the stream : Optional as stream can be empty
+Stream.of(19,2,3,5,10,34).findFirst().ifPresent(System.out::println); // 19
+
+- findAny() returns any random value from stream
+---------------------------------------------------------------------------------------------------
+
+
+Parallel Stream
+
+- helps to perform operations on stream concurrently using multicore cpu
+- .parallelStream() is used rather than .stream()
+
+Internally it does:
+1. Task splitting:
+- uses spliterator() to split the data into multiple chunks.
+- it takes the entire data, call trySplit() on it to recursively divide it into smaller chunks and keep doing this process
+
+2. Task submission and parallel processing:
+- chunked data is given to Fork join pool which processes and joins each subtask recursively
+
+long currentTime = System.currentTimeMillis();
+List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+numbers.parallelStream()
+    .map(val -> -1 * val)
+    .filter(val -> val < -5)
+    .forEach(System.out::println);
+long elapsedTime = System.currentTimeMillis() - currentTime;
+System.out.println("Elapsed time: " + elapsedTime); // 2ms

@@ -1,0 +1,24 @@
+1. Unsafe class - its use
+2. Sync
+3. VarHandle.java OR java.lang.invoke package in general and relation with Sync
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

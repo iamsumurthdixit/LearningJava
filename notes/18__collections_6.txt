@@ -1,0 +1,78 @@
+Collections - Set
+
+
+- interface extending Collection interface
+- in terms of HashSet, it uses HashMap internally with a dummy value to be stored for every key, hence, duplicates are not allowed ( hash is same ), 1 null can be stored, insertion order is not maintained
+- unlike list, elements in Set can NOT be accessed using index.
+
+Methods in Set
+
+- add(E) : insert and return T/F if element not present before
+- remove(E) : remove and return T/F is element was present before
+- addAll(Collection c): performs union of 2 sets at once.
+- removeAll(Collection c): removes elements of c from the current set
+- retainAll(Collection c): performs set intersection, elements present in both sets
+---------------------------------------------------------------------------------------------------
+
+
+HashSet
+
+
+- internally uses HashMap, hence, can provide initialCapacity and loadFactor
+- NOT thread-safe
+- NOT guarantee the order of insertion of elements
+- all time complexities similar to HashMap
+---------------------------------------------------------------------------------------------------
+
+
+Thread-safe Set
+
+- obtained from .newKeySet() method present in ConcurrentHashMap class
+- this set internally does all operations in synchronized manner
+- hence, allows to R/W simultaneously
+
+eg:
+// assume Set<Integer> s1 = new HashSet<>(); // s1 = [11,22,33,4]
+Iterator<Integer> iterator = s1.iterator();
+    while(iterator.hasNext()) {
+        int val = iterator.next();
+        if(val == 33) {
+            s1.add(99);
+        }
+        System.out.println(val);
+    }
+
+- this code will give `ConcurrentModificationException` while attempting to read using iterator and write using .add simultaneously and HashSet is not thread-safe
+
+->> To make thread-safe, to handle concurrent read-writes,
+
+Set<Integer> threadSafeSet = ConcurrentHashMap.newKeySet();
+---------------------------------------------------------------------------------------------------
+
+
+LinkedHashSet
+
+
+- internally used LinkedHashMap
+- preserves insertion order because of doubly linked list
+- attempting to .add(E) if E already exists does nothing on set order
+- accessOrder is NOT present unlike LinkedHashMap
+- NOT thread safe
+
+
+Thread-safe version of LinkedHashSet
+
+- created using Collections.synchronizedSet()
+-> Set<Integer> threadSafeSet = Collections.synchronizedSet(new LinkedHashSet<>());
+
+NOTE: it is a very basic version of thread-safety and DOES NOT allow concurrent R/W
+- manually putting locks is required to do such operations
+---------------------------------------------------------------------------------------------------
+
+
+TreeSet
+
+
+- internally uses TreeSet. O(logN) for everything
+- can NOT store null value
+- can provide custom Comparators // eg for Integer: TreeSet<>((o1, o2) -> o2 - o1);

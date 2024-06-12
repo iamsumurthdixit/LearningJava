@@ -1,0 +1,96 @@
+Collections - LinkedHashMap and TreeMap
+
+
+LinkedHashMap
+
+
+- provides 2 types of ordering on keys
+1. insertion order : retrieve elements in the same way they were inserted
+2. access order : the most frequently accessed element should be present in the front and least at last
+
+- uses doubly linked list internally, where each node, Entry<> class is extended from HashMap.Node, with before, after links
+- .forEach() on linked hash map object iterates using .after link of nodes, hence maintains the insertion order when accessOrder is false ( which is false be default )
+
+---------------------------------------------------------------------------------------------------
+Access ordered linked hash map
+
+- using constructor new LinkedHashMap(16, 0.75f, true);
+- puts the MOST frequently `accessed` element key node "at the last"
+- can be used for caching purposes, where the most frequently used element is always at the last and purge ( remove ) the remaining elements
+---------------------------------------------------------------------------------------------------
+
+NOTE: LinkedHashMap is NOT thread-safe
+- there is no thread-safe alternative to this
+- so, every method needs to be executed in thread safe manner manually
+---------------------------------------------------------------------------------------------------
+Manual fix of thread safe LinkedHashMap
+
+Collections.synchronizedMap(new LinkedHashMap<>());
+
+eg: Map<Integer, String> threadSafeMap = Collections.synchronizedMap(new LinkedHashMap<>());
+
+- this method internally puts the synchronized keyword on every method, so we don't have to write it explicitly, nothing else.
+---------------------------------------------------------------------------------------------------
+All time complexities in LinkedHashMap are "NOT" amortized O(1), can be upto O(N)
+---------------------------------------------------------------------------------------------------
+NOTE: Unlike HashMap, which converts the bin to rb tree, LinkedHashMap DOES NOT convert to any tree. It keeps using the doubly linked list only. Hence, the overall performance of linked hash map is slower.
+---------------------------------------------------------------------------------------------------
+
+
+TreeMap
+
+
+- concrete class implementing NavigableMap interface
+- NavigableMap extends SortedMap which extends SequencedMap which extends Map
+- sorted according to natural ordering (asc/dsc) OR Comparator provided
+- uses Red black tree
+- insertion / deletion / get , all in O(logN)
+---------------------------------------------------------------------------------------------------
+
+
+Entry<> (type of node) of TreeMap
+
+- contains following fields
+    K key;
+    V value;
+    Entry<K,V> left;
+    Entry<K,V> right;
+    Entry<K,V> parent;
+    boolean color = BLACK;
+---------------------------------------------------------------------------------------------------
+
+
+Methods from SortedMap interface
+
+- .headMap(K key) : returns a shallow copy of the map containing keys strictly smaller than K
+- .tailMap(K key) : returns a shallow copy of the map containing keys greater than or equal to K
+- .firstKey() : returns the smallest key
+- .lastKey() : returns the greatest key
+
+NOTE: any changes done in the map obtained from .headMap() or .tailMap() are reflected vice-versa
+
+NOTE:
+to access these methods, the object reference CANNOT be stored in Map. because they are not available in Map interface. they are available in SortedMap interface. hence, these above methods can only be accessed when the object reference is stored in SortedMap OR NavigableMap (child interface) or TreeMap (class itself)
+---------------------------------------------------------------------------------------------------
+
+
+Methods from NavigableMap interface
+
+
+- lowerEntry(K) : return Map.Entry<> for a node having key strictly less than K else null
+- lowerKey(K) : same with key
+- floorEntry(K) : like .lowerEntry(), but with less than or equal to
+- floorKey(k)
+- ceilingEntry(K): return entry with key greater than or equal to K or null
+- ceilingKey(K): for key
+- higherEntry(K) : entry with key strictly greater than K
+- higherKey(K)
+- firstEntry() : return the first entry (key-value) in map
+- lastEntry() : return last entry
+- pollFirstEntry() : return first entry and then remove that entry from map
+- pollLastEntry() : for last entry , get and remove
+- descendingMap() : returns a shallow copy of the map in reverse order. any changes are reflected in both maps
+- navigableKeySet() : returns the keys of the map in order of the map
+- descendingKeySet() : returns the keys of the map in reverse order
+- headMap(K, bool inclusive) : returns the shallow copy for keys less than or equal to K based on inclusive
+- tailMap(K, bool inclusive) : for greater than or equal to

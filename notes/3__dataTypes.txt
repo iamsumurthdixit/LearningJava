@@ -58,11 +58,11 @@ int val = 35;
 long bigVal = val; (automatic) 
 
 
-2. Downcasting / Explicit conversion
+2. Down-casting / Explicit conversion
 - beware of ranges
 
 int val = 34; 
-byte newval = (byte) val; 
+byte newVal = (byte) val;
 
 
 3. Promotion 
@@ -128,10 +128,10 @@ public class Employee {
 Reference / Non-primitive data types
 
 why is it called reference ? 
-- when you write Employee newEmployee = new Employee(); then memory is allocated for this object on HEAP and the variable newEmployee holds the reference to that memory location in heap. Also, when you pass this variable newEmployee into some method like private static void modify(Employee employee) {}, then this argument varibale employee also holds the reference to memory in heap. so any change inside this method will be reflected in other methods as wel. (entire concept of pointers acheived through reference) 
+- when you write Employee newEmployee = new Employee(); then memory is allocated for this object on HEAP and the variable newEmployee holds the reference to that memory location in heap. Also, when you pass this variable newEmployee into some method like private static void modify(Employee employee) {}, then this argument variable 'employee' also holds the reference to memory in heap. so any change inside this method will be reflected in other methods as well. (entire concept of pointers in C++ achieved through reference in Java)
 
 
-NOTE: Unlike C++, there is NO concept of "pass by reference" in java, in c++ it is achieved using pointers. in "java everything is pass by value"
+NOTE: Unlike C++, there is NO concept of "pass by reference" in java, in C++ it is achieved using pointers. in "java everything is pass by value"
 
 
 
@@ -145,7 +145,7 @@ NOTE: Unlike C++, there is NO concept of "pass by reference" in java, in c++ it 
 - in string constant pool, only 1 instance of "hello" will be created and both s1, s2 will have a reference to its memory in heap.
 - so if you do s1==s2, it will be true, because both s1, s2 point to the same memory location in SCP in heap. also, s1.equals(s2) will be true which matches the value
 - if you do now s1 = "bye"; this will create a new string inside SCP in heap and point s1 to its reference, now both s1==s2 and s1.equals(s2) will be false
-- if you write String s3 = new String("hello"); then this s3 is a normal String object which is present in heap OUTSIDE scp. So, s3 will have the reference of the memory location of this object. here, s2.equals(s3) will be true (value match) but s2==s3 will be false, becuase s3 is outside scp, s2 is inside scp (due to formation by string literal)
+- if you write String s3 = new String("hello"); then this s3 is a normal String object which is present in heap OUTSIDE scp. So, s3 will have the reference of the memory location of this object. here, s2.equals(s3) will be true (value match) but s2==s3 will be false, because s3 is outside scp, s2 is inside scp (due to formation by string literal)
 
 
 
@@ -224,8 +224,8 @@ double - Double
 - 2 kinds here: 
 
 - Autoboxing : primitive to wrapper class: 
-int a = 34; 
-Integer wa = a; 
+int aa = 34;
+Integer wa = aa;
 
 - Unboxing : wrapper to primitive 
 Integer wb = 978; 

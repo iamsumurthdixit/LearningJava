@@ -1,0 +1,155 @@
+Multithreading - putting locks for a code section across various objects with various threads.
+
+---------------------------------------------------------------------------------------------------
+VERY IMPORTANT TAKEAWAY:
+
+- all the below mechanisms work ONLY when the single lock instance is passed into "all" the objects of SharedResource class. if you try to create / init a new lock instance in them, there will NOT be any coordination among the threads and no mutex.
+
+- NOTE: however, if you are sure to work with only 1 object of SharedResource, then having a lock inside the object will also work with different threads.
+
+IMPORTANT NOTE: using DI, to simplify above scenarios, declare `final` instance of lock you want to use and pass the same lock instance to every new object of the SharedResource, which will init all objects with same lock instance using constructor DI.
+---------------------------------------------------------------------------------------------------
+
+
+problem: acquiring lock when multiple objects are present and ONLY 1 thread should be able to execute some code at a time across all objects. synchronized can not be used.
+
+without reentrant locks : using monitor locks using synchronized:
+
+- if 2 objects are operated on by multiple threads, both threads can execute the code on them, without having to wait for other. because synchronzied lock work only on 1 object.
+
+public class SharedResourceReentrant {
+    public synchronized void producer() {
+        out.println("sync lock by thread -> " + Thread.currentThread().getName());
+    }
+}
+
+sync lock by thread -> Thread-1
+sync lock by thread -> Thread-0
+
+
+---------------------------------------------------------------------------------------------------
+
+solution using advanced locks:
+
+1. Reentrant lock
+
+- instead of objects, only 1 single lock will take care of about locking and unlocking across all objects across all threads. just that the lock object should be same.
+- checkout SharedResourceReentrant.java
+
+ReentrantLock lock = new ReentrantLock();
+SharedResourceReentrant resource1 = new SharedResourceReentrant();
+SharedResourceReentrant resource2 = new SharedResourceReentrant();
+
+Thread th1 = new Thread(() -> {
+    resource1.producer(lock);
+});
+Thread th2 = new Thread(() -> {
+    resource2.producer(lock);
+});
+th1.start();
+th2.start();
+
+reentrant lock acquired by thread -> Thread-0 on object hashCode = 203621438
+reentrant lock released by thread -> Thread-0 on object hashCode = 203621438
+reentrant lock acquired by thread -> Thread-1 on object hashCode = 2113185588
+reentrant lock released by thread -> Thread-1 on object hashCode = 2113185588
+---------------------------------------------------------------------------------------------------
+
+
+2. ReadWrite lock :
+
+- used when the application's read are very very high than writes.
+
+- any S on S.
+- no X with X.
+- no X with X
+
+checkout SharedResourceReadWrite.java
+
+VERY IMPORTANT NOTE: in the below code, i am passing same lock instance on all the objects of SharedResourceReadWrite. if a new lock instance is created inside it everytime the object is created, then there will NOT be mutual exclusion and everything will break. hence, to ensure, mutex, you MUST pass the lock externally ( DI principle )
+
+SharedResourceReadWrite resource1 = new SharedResourceReadWrite();
+SharedResourceReadWrite resource2 = new SharedResourceReadWrite();
+ReadWriteLock lock = new ReentrantReadWriteLock();
+
+Thread th1 = new Thread(() -> {
+    resource1.producer(lock);
+});
+Thread th2 = new Thread(() -> {
+    resource1.producer(lock);
+});
+Thread th3 = new Thread(() -> {
+    resource2.consumer(lock);
+});
+th1.start();
+th2.start();
+th3.start();
+
+output :
+read lock acquired by: Thread-1
+read lock acquired by: Thread-0
+read lock released by: Thread-1
+read lock released by: Thread-0
+write lock acquired by: Thread-2
+write lock released by: Thread-2
+---------------------------------------------------------------------------------------------------
+
+3. StampedLock:
+
+- works both as R/W lock with optimistic lock
+- optimistic locking means to read data item WITHOUT putting explicit lock.
+- this is possible by maintaining a version number [ long stamp ] that indicates if the data is modified by an exclusive lock.
+
+it has 3 components:
+- optimistic read -> without putting read lock and then validate
+- S: read lock -> is validation fails, acquire read lock (ReadWriteLock)
+- X: write lock -> only for writing, Reentrant lock.
+
+working:
+- try reading using optimistic read, and get long stamp.
+- after this if any thread writes data by putting a X lock, then the validation of optimistic read will ALWAYS fail because releasing the write lock increments the stamp, stating it has modified.
+- in this case, put a S lock then read it, at this point, any number of S lock can be applied by reader threads. but, NO writer thread will be able to X lock
+- in this case, no need to validate anything. just lock.unlockRead(stamp) to release S lock. this does NOT increase stamp.
+
+NOTE: any optimistic read will NOT block any S lock / X lock operation. BUT, any X lock operation will cause the validate to fail on optimistic read to maintain consistency of updated data. and S, X lock will work as usual.
+
+-> used in scenarios when reads are much higher than writes, then reading without putting a lock is faster in cases when validation passes.
+- it is high performance, low contention scenario.
+
+- checkout SharedResourceStamped.java
+---------------------------------------------------------------------------------------------------
+
+
+4. Semaphore lock
+
+- to control access of a shared resource "by multiple threads" at same time.
+- this is given by "permit"- max number of threads that can use a permit by invoking .acquire(). if a thread is not able to acquire() it is put in blocked/waiting state. OR use tryAcquire():bool which return immediately.
+- after invoking above, enter CS, perform and then ALWAYS call release(), otherwise deadlock will happen.
+- fairness is a bool to force FIFO order of threads, otherwise, any order can be possible
+- used in thread signaling, DB connections etc.
+---------------------------------------------------------------------------------------------------
+
+Condition objects :
+
+
+- for flexibility and thread communication for extrinsic locks like Reentrant locks.
+- used when intrinsic locks ( synchronized ) are not sufficient which has wait() and notify(), notifyAll() to trigger thread communication and these operations are "confined to a single object on which it is applied". in such cases, synchronized keyword must be before wait()
+- condition objects are applied to lock conditions and have similar mechanism, signal(), signalAll() and await(). in such cases, lock() must be called before await() is called.
+- now, an object can have many condition objects associated with its lock for readability, rather than just wait() and notify() in intrinsic locks.
+
+NOTE:
+- condition objects are used ONLY for ""thread signaling in exclusive access"" (X-locks)
+- hence, condition objects are present only in:
+
+1. ReentrantLock:
+Lock lock = new ReentrantLock();
+Condition condition = lock.newCondition();
+
+2. ReadWriteLock.writeLock():
+ReadWriteLock lock = new ReentrantReadWriteLock();
+Condition condition = lock.writeLock().newCondition();
+
+why not in readLock() ? -> because read lock is shared by many threads at same time, no need to put signal mechanisms
+
+why not in StampedLock ? -> due to performance, StampedLock prefers validate() and tryOptimisticRead()
+why not in Semaphore ? -> uses only acquire() and release() for signaling.

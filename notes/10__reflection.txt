@@ -1,0 +1,70 @@
+Reflection
+
+
+- examine class, methods, fields at "runtime"
+- possibly change the behaviour of the class also.
+- hence, it is used to READ the META DATA and possibly change it
+---------------------------------------------------------------------------------------------------
+
+How to do reflection of classes ?
+
+- create an object of the `Class`
+
+what is class Class ?
+
+- instance of the class `Class` represents "classes at runtime"
+- JVM creates 1 `Class` object for every class loaded during runtime.
+- this Class object contains the metadata of a particular class (methods, fields, constructor etc.)
+---------------------------------------------------------------------------------------------------
+
+3 ways to get class Class object ?
+
+suppose, we have: class Bird() {}
+
+1. using Class.forName("some_class_name")
+Class birdClass = Class.forName("Bird");
+- used for the runtime object creation of Class object associated with the `some_class_name`
+- throws ClassNotFoundException
+
+2. using .class
+Class birdClass = Bird.class;
+- used for the compile time Class object associated with the "some_class_name"
+- does not throw any exception, handled at compile time
+
+3. using .getClass() on the object of the class
+Bird birdObj = new Bird();
+Class birdClass = birdObj.getClass();
+
+- in all these 3 cases, the birdClass object is created by the JVM.
+---------------------------------------------------------------------------------------------------
+
+Meaning of getting reflection of a class:
+
+get the associated `Class` object for that class
+---------------------------------------------------------------------------------------------------
+
+
+Invoke methods of a class using Reflection
+
+- create the `Class` object for a particular class using Class.forName() only.
+- create an object using `Object` and .newInstance(), which invokes the constructor to get a new object of 'class'
+- find the existence of the method with its argument return types and get the method
+- invoke the method using .invoke()
+---------------------------------------------------------------------------------------------------
+
+
+Modifying the value of fields of a class using reflection
+
+- setting the value of a `private` field outside the class ( HIGHLY DISREGARDED, VIOLATES ENCAPSULATION )
+- get the field from reflection using .getDeclaredField("private_field_name")
+- set the accessibility to true for this field on a particular object of that class using field.setAccessible(obj, true)
+- now value of the private field can be set outside the class
+---------------------------------------------------------------------------------------------------
+
+
+- Using reflection, private Constructors can be made accessible, allows creation of the object
+- "breaks the singleton pattern". again, highly disregarded
+---------------------------------------------------------------------------------------------------
+
+Reflection is slow, as everything happens at runtime.
+- Avoid reflection, usually no need to use it

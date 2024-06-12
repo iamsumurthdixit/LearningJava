@@ -6,8 +6,19 @@ Interface
 - CAN extend ANY number of interfaces using "extends" keyword and comma separated parent interfaces
 - can NEVER be used to form objects
 - all the methods in an interface are abstract methods (methods with only signatures)
+
+NOTE: ANY kind of  class (public/ private/ protected/ default) can implement a `public` interface
 ---------------------------------------------------------------------------------------------------
 
+VERY IMPORTANT GENERAL NOTE
+
+Although in java, the parent interface / class (reference variable) can store the reference of the concrete class object having method definitions. BUT, in such case, ONLY those methods will be accessible on the object which have been declared/defined upto the scope of the reference storing class/interface
+
+Eg: TreeMap, concrete class implements NavigableMap extends SortedMap which extends SequencedMap which extends Map.
+
+Now, the reference of the TreeMap object can be stored in either Map or SequencedMap or SortedMap or NavigableMap or TreeMap ( parent -> child order )
+BUT, say if some method is declared in SortedMap interface level, say .headMap(), then, this method is only accessible ONLY if the reference was stored in SortedMap or its descendants
+---------------------------------------------------------------------------------------------------
 - Need of interface:
 
 
@@ -68,10 +79,15 @@ Interface implementation:
 
 Nested interface:
 
-1. if within an interface: MUST be public
-2. if within a class: can be private, protected, public or default
+1. if within an interface: it is implicitly `public static` ( IMPORTANT ) , eg: Entry in Map
+2. if within a class: can be private, protected, public or default and static (always)
+
+NOTE: if an interface is nested, be in class or interface, it is ALWAYS static, which means, the class implementing this nested interface DOES NOT need to implement the enclosing interface or extend the enclosing class
+
+NOTE: if the nested interface is static, this interface can be implemented without the need of implementing enclosing interface and the class implementing this interface can either be static OR non-static
 
 // skipping the rest from this part
+NOTE: come back and complete this part
 ---------------------------------------------------------------------------------------------------
 
 
@@ -113,37 +129,7 @@ How to extend an interface that contains the default method
 Java 9 features
 
 
-- private methods can be provided inside an interface, these methods can NOT be accessed outside the interface
+- "private methods" can be provided inside an interface, these methods can NOT be accessed outside the interface
 - so what is the use ? - used when there are multiple default methods in an interface that share some common functionality, private methods can be used
 - private methods can be both "static" and "non-static", hence, `private` or `private static`
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- private non-static methods can access all kinds of methods and variables, but private static methods can only access static variables and static methods (both private and public)

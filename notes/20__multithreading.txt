@@ -1,0 +1,75 @@
+Multithreading -  process, threads, memory model
+
+Process
+- instance of a program that is getting executed, has its own heap memory and resources, does not share memory with any other process.
+- when bytecode is generated using javac, then, it is converted to machine code using command java filename.java, then a new process is created by JVM and initially it contains only 1 thread, main
+
+Thread
+- "smallest set of instructions" that are executed by cpu independently.
+- from main thread, we can create multiple threads to perform task concurrently
+---------------------------------------------------------------------------------------------------
+
+sequence flow :
+
+1. javac Main.java
+- bytecode is created
+
+2. java Main
+- at this point 2 things are created :
+
+2A- a new process is created
+2B- a new "JVM instance" is created
+
+NOTE: JVM contains stack memory, heap memory, code segment, data segment, registers, counters etc.
+- each time a new process is created, a new JVM instance is also created and allocated to that process such that it contains the code segment, data segment, counters, registers, heap memory, stack memory.
+
+NOTE: JVM contains a huge heap size say 10 GB. each process, when started, is allocated some memory from this pool, which can be configured using -Xms flag for min size and -Xmx for max size. if the process requires more memory than it is allocated, OutOfMemoryError will occur
+
+3. during JIT compilation of the bytecode to machine code, JVM will recognize all the threads present in the bytecode, and will register each thread in the process and will allocate stack, register and counter to each of them and initialize the counter of each thread pointing to the address in the code segment of the process from where that thread is supposed to start execution.
+
+4. then allocation of threads is taken care by JVM, which will be submitted to CPU for execution, any intermediate results are stored on registers of the thread during context switching.
+
+-> code segment:
+- only 1 in a single process, read-only, shared among all the threads
+- it is the binary machine code obtained after compilation of bytecode by JIT compiler
+
+-> data segment:
+- only 1 in a single process, read-write, shared among all threads within the process.
+- contains global and static variables defined in the code.
+- synchronization mechanism required to update the values
+
+-> heap memory:
+- only 1 in a single process, read-write, shared among all threads within the process.
+- used for objects created at run-time by new keyword.
+- each process has exclusive heap memory address pointing to the global heap memory of JVM.
+- no 2 processes have intersecting heap memory addresses.
+- each thread can R/W data in the heap of its own process only.
+- sync is required among threads.
+
+-> stack memory:
+- each thread has its own stack memory to manage local variables and method calls
+
+-> registers:
+- each thread has its own register
+- helps in context switching, saving temp values of cpu on registers
+- when JIT converts the bytecode to machine code, it uses registers to optimize for the platform
+
+-> counter / may call as PC
+- each thread has its own counter, which points to instruction [binary instruction in code segment of the process] being executed.
+- after successful execution it is incremented.
+- basically it helps each thread to keep track of the machine code in code segment to be run by that thread.
+
+
+NOTE: all this is managed by JVM
+---------------------------------------------------------------------------------------------------
+
+
+multithreading :
+
+- allow a program to perform multiple operations at the same time.
+- each such operation will share memory space ( code segment ) and some data ( data segment ) but remain independent for execution.
+
+difference b/w multitasking and multithreading :
+
+1. happens at process level, nothing is shared.
+2. happens at thread level within a process. code and data and heap memory is shared.

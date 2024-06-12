@@ -1,0 +1,180 @@
+Multithreading - thread creation, lifecycle, inter-thread communication
+
+2 ways to create a thread:
+
+
+1. implementing Runnable interface: void run()
+
+- used when you already have a child class, so you cannot have another super class (Thread) to extend
+
+how to use it?
+
+Method 1: explicitly implementing Runnable on the class
+
+- create any class ( that may even be a subclass of another class ) and implement the Runnable functional interface.
+- override the void run() of the interface.
+- create the object of this class where you need ( like in main() )
+- create a Thread from this object by invoking the constructor of Thread class.
+- at this point, new thread is only created, not started.
+- start the operation in another thread by invoking .start() of the thread object.
+- in this way, you can have any functionality from any class and still run it in a new thread.
+- preferred in production. why ? because in reality, a class can have so many compositions, so the only way to run in a thread is to implement Runnable.
+
+Method 2: directly creating a Thread object of a class that does NOT implement Runnable functional interface, BUT, override the run() using lambda function in the Thread constructor
+eg:
+MyNonRunnableClass obj = new MyNonRunnableClass();
+// MyNonRunnableClass does NOT implement Runnable
+Thread t = new Thread(() -> { obj.doSomething(); });
+OR replace lambda by method reference like below
+Thread t = new Thread(obj::doSomething);
+// overriding void run() using lambda expression, checkout
+MonitorLockExample
+
+
+-------------------------------------------------------------------
+
+2. extending Thread class
+- MUST override the void run() from Thread class in your class to run it. otherwise, nothing happens.
+- only difference from above is now no Thread object is explicitly created because the class itself "is-a" Thread object.
+---------------------------------------------------------------------------------------------------
+
+
+Thread lifecycle
+
+1. new
+- thread is created, only an object in memory, not yet started
+
+2. runnable [ sub-part running ]
+- thread is ready to run
+- waiting for cpu time.
+- put the monitor locks
+
+2A. running
+- thread executing its code on cpu.
+- frequent context-switching: runnable <-> running
+
+3. blocked -> happens automatically
+- I/O from file / disk / db
+- to acquire lock held by another thread
+- IMPORTANT: in this state, all MONITOR LOCKS are released
+
+4. waiting -> manually triggered using below methods
+- when we explicitly call wait() on runnable state
+- go back to runnable when notify() / notifyAll()
+- all MONITOR LOCKS are released
+
+5. timed waiting
+- waiting for specified time using sleep(),  join()
+- do NOT release MONITOR LOCKS
+
+6. terminated
+- life of thread is completed, it cannot be started again
+- can be manually triggered at any point by .stop()
+---------------------------------------------------------------------------------------------------
+
+Monitor Lock
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------
+
+why stop, resume, suspend methods are deprecated?
+
+- stop : terminated thread abruptly WITHOUT any lock release, no resource clean up.
+- suspend : puts thread on hold temporarily WITHOUT any lock release
+- resume : to resume the thread put on hold by suspend. since suspend is deprecated, that is why resume.
+
+-> all these methods can lead to deadlock,
+---------------------------------------------------------------------------------------------------
+
+.join() on a thread to wait for the completion of that thread and put the current thread on wait until that finishes to maintain coordination
+
+eg. in main() :
+    producerThread.start();
+    producerThread.join();
+    // now, rest of code in main() will execute after producerThread is terminated.
+---------------------------------------------------------------------------------------------------
+
+thread priority :  threadName.setPriority(1 to 10)
+
+- [1 (min) - 10 (max)]
+- can NOT rely on this to predict thread ordering
+- it is just a "hint" to jvm which to execute next, but NOT a strict rule.
+- NEVER used in production.
+---------------------------------------------------------------------------------------------------
+
+
+daemon thread
+
+
+
+
+    Thread userThread = new Thread(() -> {
+        try {
+            Thread.sleep(3000);
+            out.println("user thread completed = " + Thread.currentThread().getName());
+        } catch (InterruptedException e) {
+            //
+        }
+    });
+    Thread daemonThread = new Thread(() -> {
+        while(true) {
+            out.println("daemon thread running = " + Thread.currentThread().getName());
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                //
+            }
+        }
+    });
+    daemonThread.setDaemon(true); // IMPORTANT
+    userThread.start();
+    daemonThread.start();
+    out.println("main thread finished = " + Thread.currentThread().getName());
+
+
+output when daemon is set :
+
+main thread finished = main
+daemon thread running = Thread-1
+daemon thread running = Thread-1
+daemon thread running = Thread-1
+user thread completed = Thread-0
+
+output when daemon is NOT set / acting as user thread
+
+main thread finished = main
+daemon thread running = Thread-1
+daemon thread running = Thread-1
+daemon thread running = Thread-1
+user thread completed = Thread-0
+daemon thread running = Thread-1
+daemon thread running = Thread-1
+daemon thread running = Thread-1
+daemon thread running = Thread-1
+... so on, will not end itself
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

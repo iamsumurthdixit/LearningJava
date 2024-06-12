@@ -21,12 +21,12 @@ advantages:
 
 
 3. INHERITANCE
-- capability of a class to inherit properities(data, function) of the parent
+- capability of a class to inherit properties(data, function) of the parent
 - 4 types: 
 	- single : A -> B
 	- multilevel : A -> B -> C
-	- hierarichal : A -> B, A -> C
-	- multiple : acheived through interface only 
+	- hierarchical : A -> B, A -> C
+	- multiple : achieved through interface only
 
 advantages: 
 - code reusability
@@ -41,13 +41,13 @@ advantages:
 - compile time / static / method overloading: 
 - occurs in the same class only
 - the return type of 2 methods may / may not be same 
-- the number of arguments OR/AND the data type of arguments MUST differ. if the number of arguments and their type is same, but the reutrn tyep of the methods is different, it will ERROR, because java will not know at compile time which method to call
+- the number of arguments OR/AND the data type of arguments MUST differ. if the number of arguments and their type is same, but the return type of the methods is different, it will ERROR, because java will not know at compile time which method to call
 
 - runtime / dynamic / method overriding: 
 - occurs in different class which are inherited 
 - method return type, number and type of arguments MUST EXACTLY match
 - only the internal implementation differs
-- how it is runtime: it depends on the class whose object is used to call the method, if it is the child class, then mehthod of the child class will be used, and if it is parent class object, then parent class object will be used. it is simply "overriding" the method in child class
+- how it is runtime: it depends on the class whose object is used to call the method, if it is the child class, then method of the child class will be used, and if it is parent class object, then parent class object will be used. it is simply "overriding" the method in child class
 
 
 -----------------------------------------------------------------------------------------------
@@ -76,4 +76,4 @@ eg: if School objects has a data attribute List<Student> students, then if stude
 
 2B. COMPOSITION (strong relationship):
 - ending of 1 object will end other object
-eg: if School object has List<Classroom> classrooms, and if School object is removed, then those classrooms will not exist. 
+eg: if School object has List<Classroom> classrooms, and if School object is removed, then those classroom objects will not exist.

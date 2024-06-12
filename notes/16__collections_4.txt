@@ -1,0 +1,128 @@
+Collections - Map
+
+
+why is Map not a child / linked to Collection interface?
+- in Collection, every method works on a single value, in Map, everything is key-value, which require a completely different implementation. hence, it is different
+---------------------------------------------------------------------------------------------------
+
+Some Map implementations
+
+- HashMap - does not maintain insertion order ( only implementation of Map that allows null as both key, values. no other implementation allows null as key or as value )
+- Hashtable - synchronized version of HashMap, maintains order
+- LinkedHashMap - maintains the insertion order
+- TreeMap - maintains the sorted order of keys internally
+---------------------------------------------------------------------------------------------------
+
+
+Methods in Map interface
+
+- size(): number of key-value pairs
+- isEmpty(): size() == 0 ?
+- containsKey(e) : true/false
+- containsValue(e) : true/false if some key(s) is(are) mapped to this value `e`
+- get(e) : return the value mapped to key `e` else null
+- put(K, V) : insert if K not present else update the value of K with V
+---------------------------------------------------------------------------------------------------
+
+HashMap internal design ( VERY IMPORTANT )
+
+
+4 things to know in a hashmap
+
+
+1. Load factor
+2. Entry<K, V> interface
+3. Re-hashing
+4. Performance
+
+
+- HashMap stores the data in an array of type Node<K, V> ( static class implementing static nested interface of Map, Map.Entry<K, V> ). the name of this array is `table`.
+- Node<K, V> has 4 fields, `final int hash`, `final K key`, `V value`, `Node<K, V> next`
+- the default size of the HashMap table is 16
+
+0 |_|->|_|->|_|
+1 |_|->|_|
+2 |_|
+3 |_|->|_|->|_|->|_|
+4 |_|
+Node<K, V>[] table, having bins of nodes at each index.
+---------------------------------------------------------------------------------------------------
+
+
+What happens when you try inserting an element inside hashmap ?
+
+
+Working of put(K, V)
+
+- first the `table` ( an array of initial size ) is created
+- when <K, V> being inserted, then some hashing algo will compute the hash of the `K` and then, will do hash(K) % table.length to find the index at which this key can be inserted.
+- if there is no key K already present at this index, then the entries are made for hash, K, V and next=null.
+- if some K is already present at this index in table, then, if the existing key matches the new key, the value is overridden.
+- if new and old keys don't match, then new Node<K, V> is created with hash of this new key, K, V and next=null and is attached at the end of the linked list of Node<>, originating from the node of the first instance of the key present at this index within the array `table`
+---------------------------------------------------------------------------------------------------
+
+
+Contract b/w hashCode() and equals()
+
+- methods defined in `Object.java`
+- 2 contracts are defined such that,
+C1. for any 2 objects whose equals() is true, their hashCode() will ALWAYS be same
+C2. for any 2 objects whose hashCode() is same, their equals() MAY [NOT] be true
+
+
+VISUALIZATION OF C2
+- suppose for 2 keys, 6, 8, their hashCode() is same, like 39793. then hC()%len will be index. only due to the fact that multiple keys can have same value of hashCode(), a linked list of Node<> is maintained from that index in array `table` to any number of nodes, ( also called the "bin" of nodes at a particular index )
+---------------------------------------------------------------------------------------------------
+
+
+Working of get(K)
+
+- the hash(K) % table.length is done to find the index and the entire linked list is traversed started from this first Node<> in `table` till the key of Node matches K and then V is returned
+- internally, after computing index using hashCode(K), equals(K) is matched with the keys present in nodes of type Node<>.
+- hence, to get the value of a key, both hashCode(K) [ for index ] and then equals(K) [ to compare the keys ] is done
+---------------------------------------------------------------------------------------------------
+
+
+How Amortized O(1) search is maintained ?
+
+
+- there are 2 things, DEFAULT_LOAD_FACTOR ( LF = 0.75f ) and TREEIFY_THRESHOLD ( default = 8 )
+
+Concept of load factor :
+- float value used to compute the threshold to increase the `table` size. suppose, table size is currently 16, then when there already (16*.75=12) key-value pairs present in the `table` and put() is called, then first resize() happens, which usually doubles the size of the `table`
+- after the size is increased, re-hashing of all the key-values ( elements ) happens based on this new table size.
+
+Concept of Treeify threshold :
+- the load factor ensures to minimize the number of hash collisions by increasing the size of the table when elements are being inserted.
+- but, there can be a situation when the table size is large enough, but still all the computed hash of all keys are same, in which case, all the elements will be present in a single bin of nodes of a particular index.
+- in the worst case, if this list keeps on growing, the search time will lead to O(N).
+- so, to tackle this, whenever the number of nodes in a bin during put() exceed Treeify threshold, then "that bin" is converted to red-black tree, where, each Node<> is converted to TreeNode<>
+- hence, now the search and insertion time is O(logN) inside a bin
+
+
+Hence, overall search and insert time complexity of a HashMap is amortized O(1)
+---------------------------------------------------------------------------------------------------
+
+
+Important methods in HashMap
+
+- putIfAbsent(K, V): if K, present and value is null, then update its value to V, else, add entry
+- .entrySet() : set of key-value pairs
+- .keySet() : Set of keys
+- .values() : Collection of values
+---------------------------------------------------------------------------------------------------
+
+Time complexity in HashMap
+
+everything amortized
+insertion : O(1)
+deletion : O(1)
+get : O(1)
+---------------------------------------------------------------------------------------------------
+
+
+Hashtable and ConcurrentHashMap
+
+- HashMap is NOT thread-safe, does NOT maintain insertion order
+- Hashtable is completely thread-safe, maintains insertions order
+- ConcurrentHashMap is equivalent to Hashtable, thread-safe without synchronization for high-performance

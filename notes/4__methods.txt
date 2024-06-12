@@ -44,14 +44,14 @@ Types of methods
     Person obj = new Doctor();
     obj.getProfession();
     obj.getPerson();
-decided at runtime that obj is an instance of Doctor, so first it will search for the existence of getProfession() in Doctor class, for getPerson(), it is not present in t Doctor, so it is called from Person class
+decided at runtime that obj is an instance of Doctor, so first it will search for the existence of getProfession() in Doctor class, for getPerson(), it is not present in Doctor, so it is called from Person class
 
 
 5. static methods ( VERY IMPORTANT )
 - associated with class
 - called with class name
 - shared across all objects
-- static methods cannot call non-static methods and data variables, because static methods are associated with class, non-static are associated with objects. then static method will now know which object to use to call methods and data. only if you create an object of the class within the static method, only then you can access them. see Calculation class.
+- static methods CANNOT call non-static methods and data variables, because static methods are associated with class, non-static are associated with objects. then static method will now know "which object" to use to call methods and data. only if you create an object of the class within the static method, only then you can access them. see Calculation class ( IMPORTANT ).
 - static happens at compile time, hence overriding static methods "hides" the parent static method. then both child and parent classes can call their static methods using respective class names. and hence, this happens at compile time only. @Override will give error in child class if done so. see Doctor, Person
 
 -> when to declare a method static ? ( VERY IMPORTANT )
@@ -77,3 +77,67 @@ Variable number of arguments to a function
 - syntax:=> ...variable
 - must be the last argument in the method
 - treats the variable as a list
+---------------------------------------------------------------------------------------------------
+
+
+<> diamond operator 
+
+use of generic methods: 
+
+- the generic type is NOT required for methods which can inherit the same generic type from class. eg: 
+
+case 1: 
+
+class Pair<T, U> {
+    T first; 
+    U second; 
+    
+    constructor(){}
+    
+    // generic method -> no need to specify <T, U>
+    Pair<T, U> getPair() {
+        return new Pair<>((T) this.first, (U) this.second);
+    }
+}
+here, class Pair already knows about T, U as type generics. 
+
+
+- the generic type is ALWAYS required on methods if the class is NOT generic or type generics mismatch. 
+
+case 2: 
+
+class Pair {
+    Object first; 
+    Object second; 
+    
+    Pair(Object first, Object second) {
+        this.first = first; 
+        this.second = second; 
+    }
+    
+    <T, U> Pair createPair(T first, U second) {
+        return new Pair<>(first, second);
+    }
+}
+- here, <T, U> is rquired
+
+class Application {
+    Object obj; 
+    
+    <T> T getOject() {}
+    
+    <T> List<T> getAll() {}
+    
+}
+
+case 3: mismatch : 
+
+class Pair<T, U> {
+    T first; 
+    U second; 
+    
+    <A, B> Pair<A, B> swap(Pair<A, B> other) {
+        return new Pair<>(other.first, other.second);
+    }
+}
+- in this case, ONLY difference is literals, instead of T, U; A, B is used. hence, written <A, B> before method. otherwise, Pair<T, U> could be written. 

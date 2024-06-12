@@ -14,7 +14,7 @@
 
 Order of execution of java program: 
 
-java program(.java, platform independent) -> compiler -> produced bytecode(.class) -> read by JVM (platform dependent) -> machiene code read by CPU -> output 
+java program(.java, platform independent) -> compiler -> produced bytecode(.class) -> read by JVM (platform dependent) -> machine code read by CPU -> output
 
 
 
@@ -26,13 +26,13 @@ JAVA --
 
 JVM (Java Virtual Machine) 
 - abstract machine (means a software) 
-- platform DEPENDENT(mac, windows, linux etc)
-- has JIT compiler ( Just In Time ) -> input bytecode, ouput machine code 
+- platform DEPENDENT(mac, windows, linux etc.)
+- has JIT compiler ( Just In Time ) -> input bytecode, output machine code
 
 
 JRE (Java Runtime Environment)
 - combination of JVM and class libraries 
-- JVM need to resolve the linking of library code (eg .lang.Math, .utils etc)
+- JVM need to resolve the linking of library code (eg .lang.Math, .utils etc.)
 - with JRE and bytecode, you can run any java program, but you cannot code it
 - you need to have JRE and JVM both to run the program 
 
@@ -41,7 +41,7 @@ JDK (Java Development Kit)
 - has java programming lang 
 - has compiler (javac) which creates the .class file
 - has debugger
-- JDK = JRE + (P.L. [java] + compiler + debugger + etc)
+- JDK = JRE + (P.L. [java] + compiler + debugger + etc.)
 
 
 NOTE: JDK, JVM, JRE are ALL platform DEPENDENT 
@@ -54,7 +54,7 @@ In any java program:-
 1. the filename matches the classname
 2. a particular file can have ONLY 1 public class
 3. a class can have variables, methods, constructors, nested (inner) classes
-4. main() method is the starting point of the program. JVM calls the main() to start running the progam. that is why it is public static void main. it does not return anything (void), public means it can be called from anywhere (and can be called by JVM). static implies that it can be called through class only without creating the object of the class
+4. main() method is the starting point of the program. JVM calls the main() to start running the program. that is why it is public static void main. it does not return anything (void), public means it can be called from anywhere (and can be called by JVM). static implies that it can be called through class only without creating the object of the class
 5. to compile a .java program to create the bytecode:- 
 eg: to compile Employee.java -> write -> javac Employee.java -> Employee.class (bytecode) created
 6. to run the bytecode:-> java Employee -> gets output 
@@ -69,4 +69,4 @@ Some important points:-
 2. main() must be static 
 - because JVM can call main() using the class name only 
 3. the name of the java program file must match the public class within it
-- suppose, there are multiple public classes in file B.java, we have classes public A, public B, public C. now JVM searches for main() inside a public class. when there are multiple public classes, how will the JVM know in which main() is present. hence, there should be exactly 1 public class in which main() should be present. Also, JVM searches main() inside the pulic class that matches the filename 
+- suppose, there are multiple public classes in file B.java, we have classes public A, public B, public C. now JVM searches for main() inside a public class. when there are multiple public classes, how will the JVM know in which main() is present. hence, there should be exactly 1 public class in which main() should be present. Also, JVM searches main() inside the public class that matches the filename

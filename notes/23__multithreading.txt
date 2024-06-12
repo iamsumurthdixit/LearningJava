@@ -1,0 +1,69 @@
+Multithreading - Lock free concurrency
+
+
+there are 2 ways to handle thread concurrency:
+1. using locks
+2. without using locks
+---------------------------------------------------------------------------------------------------
+
+Compare and Swap (CAS):
+- low level ( hardware level cpu instruction, in java, atomic operation (native) ) for lock free conc and thread safety
+- 3 params: ( memory location, expected value, new value): if the value at memory is equal to expected, update to new value and return true / false. all this happens in a single step ( atomic )
+- if a thread fails CAS, it is NOT blocked, it will retry again. however, this will lead to "cpu spinning" if it repeatedly fails, no lock, higher conc.
+---------------------------------------------------------------------------------------------------
+
+
+ABA problem with AtomicStampedReference:
+- use versioning with CAS so that A at v1 to match with succesive A. because any write to B intermediate will change version ( int version here) and then, if again write to A, version will mismatch, so ABA will not occr.
+---------------------------------------------------------------------------------------------------
+
+NOTE: all Atomic classes internally rely on volatile variables for thread safety
+---------------------------------------------------------------------------------------------------
+
+volatile
+
+- ensures that all reads and writes are immediately visible to all threads, by directly writing to main memory rather than thread local cache.
+- any reads are also done from main memory
+- it helps in visibility of update value to all the threads and maintains ordering:
+how ordering :
+
+- java memory model ( JMM ) ensures that all the writes to volatile variables are executed first and then reads occur.
+- at low level, the CPU uses protocol to invalidate all stale copies from all cpu cores during cache coherence.
+
+
+why no atomicity / thread safety with only volatile ?
+- lets say x++:
+- 3 ops : read value, then increment, then write back the value.
+- thread interlevaing at happen at any step, hence, 2 threads can still read the same value from memory, update them individually and then write back at same time, causing "lost updates".
+- it should only be used in set and read without complex updates, eg. shutdown flag in mutlti threaded app, just that visisbility matters.
+---------------------------------------------------------------------------------------------------
+
+- Atomic classes thus combine visibility of volatile with CAS [ for more coherence, use versioning using AtomicStampedReference ] to maintain "any updates" are thread safe and then visible to all the threads immediately.
+- problem with normal volatile is lost updates, solved with CAS
+---------------------------------------------------------------------------------------------------
+
+ NOTE: lock free concurrency is ONLY applicable to very limited scope where there are no complex condition based thread concurrency
+
+ ---------------------------------------------------------------------------------------------------
+
+
+ when to use atomic classes ?
+
+ - simple atomic operations like inc/dec countes.
+ - swaping / updating single reference atomically ( AtomicReference )
+ - setting flags atomically
+ - light weight conc.
+ - fine grained control for single variable.
+ - ABA problem handling
+
+
+when to use locks ?
+
+- high contention scenarios
+- complex or compound operations on shared data having multipel operatoins.
+- read/write lock operations.
+
+NOTE: atomic classes can't gurantee atomicity for a group of operations.
+---------------------------------------------------------------------------------------------------
+
+read about thread safe versions of all the DS in Collections.

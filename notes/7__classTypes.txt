@@ -6,7 +6,7 @@ Class Types:
 - for which an object can be created using `new` keyword
 - has the implementations of ALL of its methods
 - it can be implemented from an interface OR extended from abstract class
-- Access modifiers -> public OR "package private" / default (skip to write access modifier)
+- Access modifiers -> public OR "package-private" OR "package-local" / default (skip to write access modifier)
 ---------------------------------------------------------------------------------------------------
 
 2.  Abstract class
@@ -19,7 +19,7 @@ Class Types:
 - constructors CAN be present in them and `super` child class will call the parameterized constructor
 
 VERY IMPORTANT NOTE: in java, a concrete/abstract class can extend a single [abstract] class and implement multiple interfaces at the same time:
-eg: public class A extends ParentClas implements Interface1, Interface2 {}
+eg: public class A extends ParentClass implements Interface1, Interface2 {}
 here, ParentClass can either be concrete or abstract
 ---------------------------------------------------------------------------------------------------
 
@@ -80,10 +80,10 @@ B. Local Inner class
 NOTE: inheritance of nested classes is possible for both static and non-static inner classes, it is extremely rarely used, so skipping it
 
 
-C. Anonymous Inner class
+C. Anonymous Inner class ( can also be Anonymous class in general )
 
 - an inner class without a name
-- when it is used ? ( VERY IMPORANT )
+- when it is used ? ( VERY IMPORTANT )
 - to override a method WITHOUT creating a subclass
 - see AnonymousClass
 ---------------------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ C. Anonymous Inner class
 
 5. Generic class
 
-- diamond syntax <T>
+- diamond syntax <T>, diamond operator <> = for automatic type deduce
 - `T` can be ANY NON-PRIMITIVE data type
 
 
