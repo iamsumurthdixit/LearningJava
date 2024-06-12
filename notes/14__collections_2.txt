@@ -1,0 +1,119 @@
+Collections - Queue
+
+
+Queue interface :
+- child of Collection interface
+- supports all methods of Collection interface and some other methods
+- usually FIFO, with PriorityQueue as the exemption
+---------------------------------------------------------------------------------------------------
+
+
+Methods in Queue interface :
+
+1. add() : add an element, True if successful, Exception if failed, Null is not allowed so NPE
+
+2. offer() : same as add, False if failed
+
+3. poll() : retrieves and removes head, return null if queue is empty
+
+4. remove() : retrieves and removes head, NoSuchElementException if queue is empty
+
+5. peek() : same as poll, does not remove head
+
+6. element() : same as peek, NoSuchElementException if queue is empty
+---------------------------------------------------------------------------------------------------
+
+
+PriorityQueue
+
+
+- class of the Queue interface
+- 2 types, min, max PriorityQueue, based on heap
+- elements are ordered according to their `natural ordering` ( default ) OR `Comparator` provided during the queue construction time
+
+
+for min-heap, following natural ordering is ascending order :
+
+PriorityQueue minPQ = new PriorityQueue<>();
+minPQ.add(8); minPQ.add(3); minPQ.add(7); minPQ.add(2);
+
+produces a min-heap then printing all will print in level-order using
+minPQ.forEach((Integer val) -> System.out.println(val)); // level order of the min heap
+
+while(!minPQ.isEmpty()) {
+    System.out.println(minPQ.poll()); // 2 3 7 8
+}
+
+Time complexity :
+- add(), offer() : O(logN)
+- peek() : O(1)
+- poll(), remove() : O(logN)
+- remove arbitrary element : O(N)
+
+for max-heap: provided a Comparator
+PriorityQueue maxPQ = new PriorityQueue<>((Integer a, Integer b) -> b - a);
+---------------------------------------------------------------------------------------------------
+
+
+Comparator and Comparable
+
+
+- both provide a way (helps, not actually sort) to sort the collection of objects
+Why needed ?
+- to sort the collection based on some user-defined order OR to sort user-defined class object collection
+- sorting happens through comparing 2 objects and then determining if they need to be swapped. this determination is provided through Comparator and Comparable
+---------------------------------------------------------------------------------------------------
+
+
+How to sort Object array ?
+
+- with the help of Comparator and Comparable
+
+
+
+Comparator:
+- @FunctionalInterface that has 1 abstract method `int compare(T t1, T t2)`
+- hence, when a lambda expression is provided as a comparator, then it overrides the implementation of the compare() and return -1 (t1 < t2), 0 (t1 == t2) or 1 (t1 > t2).
+- it only helps with providing this integer value.
+- now, the implementations of the sorting algorithms swap 2 objects based on these 3 integer values, IMPORTANT: swap only when t1 > t2 (1).
+
+
+Comparable:
+- public interface that has an abstract method `int compareTo(T val)`
+- this interface is implemented by classes like `Integer`, hence, Integer class has defined the compareTo method to compare the value passed in the argument of compareTo and the actual value hold by the Integer wrapper class. Then Integer class calls the `int compare(int t1, int t2)` to return -1, 0, 1
+---------------------------------------------------------------------------------------------------
+
+
+Working with Comparator
+
+eg:
+arr = {1,4,7,3,5,2,8,0,7};
+Arrays.sort(arr);
+- here, no Comparator is provided, but still ascending order happens, because it sorts on the basis of Comparable.
+
+eg: suppose public class Car having 2 fields, String name, String type;
+Car[] cars = new Car[3];
+cars[0] = new Car("honda", "sedan");
+cars[1] = new Car("audi", "sport");
+cars[2] = new Car("bmw", "luxury");
+
+then, to sort the cars list, 1,-1,0 works on the `int compareTo` in String derived from Comparable.
+thus, for sorting a collection of object on `name` :-
+
+Arrays.sort(cars, ((Car obj1, Car obj2)) -> obj1.name.compareTo(obj2.name));
+
+NOTE: the above comparator is a lambda expression.
+- to create a new comparator as a method, implement the Comparator interface in your class, or in a new Class:-
+check:- CarComp and CarNameComparator
+
+NOTE: Collections.sort() first converts the collection to array using .toArray() and calls the Arrays.sort()
+---------------------------------------------------------------------------------------------------
+
+
+Working with Comparable
+
+
+- Comparable interface has only a single method compareTo that takes only a single argument, hence, it CANNOT be used outside the class to create more than 1 method of comparing unlike in Comparator interface, that has int compare that accepts 2 arguments, and hence, multiple methods can be defined for each different kind of sorting based on different fields.
+- implementing the Comparable interface in a class allows you to define a "Fixed sorting" of the collection. Then, Collections.sort() can be called on the user-defined collection without passing any comparator.
+- this is like a naive sorting
+- eg: check CarComparable

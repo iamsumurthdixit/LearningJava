@@ -12,6 +12,7 @@ public class Calculation {
 //        stockPrice = 98;  ERROR
 //        method();  ERROR
 
+        // access non-static methods and data variables ONLY after creating an object INSIDE static method
         Calculation obj = new Calculation();
         obj.stockPrice = 98;
         obj.print();

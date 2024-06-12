@@ -1,0 +1,176 @@
+Collections - Deque and List
+
+
+Deque
+
+- child interface of the Queue interface
+- has insertion, removal from both ends
+- has all the methods of Queue and its parent, and also methods from the Deque interface
+- Deque has some extra methods as part of extending the SequencedCollection interface and some declared in Deque interface itself.
+- can be used to create Stack and Queue
+
+
+Methods in Deque:
+
+1. Throw Exception:
+
+- addFirst(e)
+- addLast(e)
+- removeFirst() : remove the first element and return it
+- removeLast()
+- getFirst() : similar to peekFirst() with exception
+- getLast()
+
+2. Don't Throw Exception
+
+- offerFirst(e) : T/F
+- offerLast(e) : T/F
+- pollFirst() : null
+- pollLast() : null
+- peekFirst() : null
+- peekLast() : null
+
+
+Behaviour of methods inherited from Queue interface:
+
+- work to represent FIFO queue, following methods from Queue call Deque methods internally
+- add() -> addLast()
+- offer() -> offerLast()
+- poll() -> pollFirst()
+- remove() -> removeFirst()
+- peek() -> peekFirst()
+- element() -> getFirst()
+---------------------------------------------------------------------------------------------------
+
+
+ArrayDeque
+
+
+- concrete class implementing Deque interface
+
+Time complexity:
+
+Insertion: Amortized O(1), worst case O(N), when the deque is full and then adding a new element, re-size happens internally where a new deque is formed upto double capacity using grow() , all the elements are copied and the incoming element is inserted.
+
+Deletion, Search : O(1)
+---------------------------------------------------------------------------------------------------
+
+BOTH PriorityQueue and ArrayDeque are NOT thread-safe.
+
+- Thread safe : - when multiple threads are accessing this collections object, object can go in an inconsistent state, where read / write are happening simultaneously
+---------------------------------------------------------------------------------------------------
+
+Thread safe version
+
+- PriorityBlockingQueue
+- ConcurrentLinkedDeque
+
+- same operations as normal thread-unsafe versions
+---------------------------------------------------------------------------------------------------
+
+
+List
+
+
+- child interface of the Collection interface
+- Difference from Queue:
+- in Queue, insertion/removal/access happens only from terminal indexes. In List, from anywhere using index
+- List interface internally uses Array data structure
+- contains methods from Collection interface and its own declared methods
+---------------------------------------------------------------------------------------------------
+
+
+Methods in List
+
+
+- add(int ind, Collection c) : insert c at ind. If element already present at i, then insert c at ind and shift all remaining to right
+- addAll(i, c) : insert all the elements of collection c at i into this list
+- sort(Comparator c) : c is always required
+- get(i)
+- set(i, e) : replace element at i with e
+- remove(i) : remove element at i and shift all remaining to left
+- indexOf(e) : first index from, -1 if not
+- lastIndexOf(e): last index , -1 if not
+- replaceAll(lambda_expr) : applies the .apply() in UnaryOperator interface extending Function<R, T> using the lambda_expr
+----------------------------------------------------------------
+- ListIterator<E> listIterator() : listIterator return the object of the class implementing ListIterator interface, child of Iterator interface ( that allows traversal in forward ), allowing traversal in backward
+
+--> New methods in ListIterator : [ check methods coming from Iterator interface also ]
+- boolean hasPrevious() : throw E if not
+- E previous()
+- int nextIndex() : return size if already at last index
+- int previousIndex() : return -1 if not
+- set(E e) : replaces the element returned by next or previous with e
+- add(E e): insert e just after index returned by previous OR just before returned by next
+
+NOTE: when doing .next(), suppose at the start, then it will return the first element of the list and now the cursor will stand between [0,1] index. so .nextIndex() will return 1 and .previousIndex() will return 0. similarly for .previous()
+
+- ListIterator<E> listIterator(int index) : listIterator starting from the index
+
+NOTE: for simplicity:
+-> ListIterator<Integer> reverseIterator = list1.listIterator(list1.size());
+- here, now use .previous()
+-> ListIterator<Integer> forwardIterator = list1.listIterator();
+- here, now use .next()
+
+- List<E> sublist(int fromIndex, int toIndex) : shallow copy of the list excluding toIndex. changes to any are reflected in both
+---------------------------------------------------------------------------------------------------
+
+
+ArrayList
+
+NOTE: null values are allowed in ArrayList
+
+- concrete class of List
+- uses array, default size is 10
+
+Time Complexity:
+- Insertion: O(1) at rear ( amortized ), O(N), when space is full and then grow() OR insertion and shifting
+- Deletion: O(N)
+- Search: O(1)
+
+NOTE: ArrayList is NOT thread safe
+
+Thread-safe version of ArrayList:
+- CopyOnWriteArrayList : here, every time a new copy of the original list is created and then modification is done using synchronized lock ( for thread safety )
+---------------------------------------------------------------------------------------------------
+
+
+LinkedList
+
+
+- allows null values
+- concrete class implementing List and Deque interface
+- hence, both methods are present like addFirst(), addLast() from Deque, and add(), remove() from the List interface, using index
+- hence, can work both as Deque and ArrayList
+- uses Linked list as the internal data structure
+- faster than ArrayList, due to no shifting in insertion / deletion
+
+Time complexity :
+Insertion : O(1) at terminals, at particular index, O(N) for lookup and O(1) for linking node
+Deletion : same as above
+Search : O(N), for lookup
+
+NOTE: LinkedList is also NOT thread safe
+---------------------------------------------------------------------------------------------------
+
+
+Vector
+
+
+- completely thread safe
+- concrete class of List interface
+- EXACTLY same as ArrayList, only difference, Vector is thread-safe
+- slower than ArrayList, due to lock/unlock (synchronized) internally on almost the methods
+---------------------------------------------------------------------------------------------------
+
+
+Stack
+
+
+- child class of Vector class, hence, by default thread safe
+- allows push() and pop()
+- Time complexity: insertion / deletion : O(1), search : O(N)
+
+Difference between Stack and Deque ( which can also be used as Stack )
+- Deque is NOT thread safe and Stack is due to being child class of Vector

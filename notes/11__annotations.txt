@@ -1,0 +1,119 @@
+Annotations
+
+
+- kind of adding `Meta-Data` to existing java code.
+- it is OPTIONAL
+- this metadata is added at `runtime`
+- Reflection is used to read this metadata
+- can be applied to class, methods, interfaces, fields, parameters etc.
+---------------------------------------------------------------------------------------------------
+
+2 Types of annotations :
+
+1. Pre-defined :
+- again of 2 types:
+-> A. Meta-Annotations ( used on annotations ) : eg. @Target, @Retention, @Repeatable, etc.
+-> B. Used on java code (class, methods etc.)  : eg: @Override, @Deprecated, @FunctionalInterface, etc.
+
+2. User-defined :
+@{Our_custom_name}
+---------------------------------------------------------------------------------------------------
+
+Annotations used on Java code
+
+
+1. @Deprecated
+- shows compile time WARNING when used on class, methods or fields and then using such class, methods or fields.
+- it means, no further improvement is happening on this code.
+- APPLIED TO: constructor, field, local variable, method, package, parameter, type (class, interface, enum)
+
+2. @Override
+- to check that at compile time, method should be overridden
+- throws error, if method not in parent
+- APPLIED TO: methods
+
+3. @SuppressWarnings
+- to IGNORE compile time warnings.
+- may lead to run time exception if warning is ignored.
+- APPLIED TO: field, method, parameter, constructor, local variable, type (class, interface, enum)
+eg: @SuppressWarning("deprecated") to suppress deprecation warnings
+OR, for all kinds of warning : @SuppressWarning("all")
+
+4. @FunctionalInterface
+- restrict interface to have only 1 abstract method
+- APPLIED TO: type (class, interface, enum)
+
+5. @SafeVarargs
+- means safe variable arguments (... args)
+- similar to @SuppressWarnings, but used at "methods" having variable number of arguments ( ...arg)
+- method MUST be static / final / private. why? because they cannot be overridden.
+- used to suppress "heap pollution warnings"
+- APPLIED TO: type (constructor, methods)
+
+what is heap pollution ?
+- done using the variable arguments.
+eg:
+public class Log (List<Integer> ... logNumbersList) {
+    Object[] objectList = logNumbersList;
+    List<String> stringValuesList = new ArrayList<>();
+    stringValuesList.add("hello");
+    objectList[0] = stringValuesList;
+}
+- logNumbersList is a reference to the list of type Integers list in heap.
+- Object[] objectList (parent type) used to create another reference that points to the same old location in heap
+- now, objectList can also store the reference to String list. hence, heap polluted with another data type.
+- when you are sure that this situation will not occur, you can suppress this warning with @SafeVarargs on class
+---------------------------------------------------------------------------------------------------
+
+
+Annotations user over another annotations ( META - ANNOTATIONS )
+
+
+1. @Target
+- this meta annotation will restrict, where a particular annotation can be applied.
+- eg -> @Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+- when the element type is 'annotation_type', then that annotation can be applied ove any annotation.
+
+
+2. @Retention
+- tells how the annotation to which it is applied will the stored in java.
+3 types:
+
+2_1. @Retention(RetentionPolicy.SOURCE): the annotation will be discarded by the compiler itself and will not present in .class upon compilation using javac.
+eg: @Override has this policy
+
+2_2. @Retention(RetentionPolicy.CLASS): annotation will be recorded in .class file but will be ignored by JVM at runtime. (hence, reflection cannot be used to get this annotation).
+
+2_3. @Retention(RetentionPolicy.RUNTIME): annotation will be recorded in .class file and will be available at runtime. you can access the annotation at runtime using reflection. eg: @SafeVarargs, @MyCustomAnnotation
+
+
+3. @Documented
+- by default, when java doc is generated from tools like (java Doc, here inbuilt in intellij), then annotations are ignored and not present in the doc.
+- used over an annotation to specify that particular annotation will be present in the java docs.
+
+
+4. @Inherited
+- by default, annotations applied over a parent class are NOT present on the child class.
+- to apply the annotation automatically (internally) on the child class, that annotation can be annotated with @Inherited.
+- eg: see CustomAnnotationChild
+
+
+5. @Repeatable
+- by default, same annotation can NOT be applied more than once.
+i.e., @Deprecated @Deprecated ... target of the annotation
+- allows us to apply an annotation more than once.
+
+- 2-step process:
+- step 1: apply @Repeatable(container) over the annotation (say, annotation1)
+- step 2: define the container as another annotation that accepts array of type annotation1.
+eg: see Category
+---------------------------------------------------------------------------------------------------
+
+
+Custom Annotations
+
+- defined using @interface keyword.
+- specify @Target ( to which this can be applied, [ optional ]), @Retention with policy ( to be available at runtime or not, then possibly use reflection )
+- within an annotation, key-values can be defined. eg: String name(); it looks like a method, but it is key(name) and value(with return type String). only primitives, String, enums, class (using .class) and annotations, and Arrays for each of them can be used to store the value of a key
+- eg: @Categories uses Category[] in a key named value
+- multiple key-value pairs can be defined

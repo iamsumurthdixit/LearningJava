@@ -1,0 +1,69 @@
+Functional Interface  ( SAM : Single Abstract Method )
+
+
+- interface having ONLY 1 abstract method
+- @FunctionalInterface keyword can be used optionally at the top
+- when you write this keyword at the top, then you will get compiler error if you try to add more methods in interface
+- default and static methods can be present since, they are not abstract
+
+NOTE: Object class methods, like String toString(), boolean equals(), when can be written in any interface ( including functional ), and they are NOT required to be implemented in the implementing class or within the interface itself, because their definition is already present in the `Object` class.
+
+
+TLDR: 3 things are allowed in functional interface other than 1 abstract method, static method, Object class defined methods and default methods
+---------------------------------------------------------------------------------------------------
+
+3 ways to implement an interface :
+
+1. By implementing in a class
+2. Using Anonymous class:
+3. Using lambda expression
+---------------------------------------------------------------------------------------------------
+
+4 Types of built-in FunctionalInterface
+
+- present in java.util.function
+- works with generic interfaces only
+
+1. Consumer : 1 argument, no result
+
+@FunctionalInterface
+public interface Consumer<T> {
+    void accept(T t);
+}
+
+2. Supplier : No argument, produce a result
+
+@FunctionalInterface
+public interface Supplier<T> {
+    T get();
+}
+
+3. Function : 1 argument, produces a result
+
+@FunctionalInterface
+public interface Function<T> {
+    R apply(T t);
+}
+
+4. Predicate : 1 argument, boolean result
+
+@FunctionalInterface
+public interface Predicate<T> {
+    boolean test(T t);
+}
+---------------------------------------------------------------------------------------------------
+
+FunctionalInterface extending another interface
+
+
+1. When extending non-functional interface (having at least 1 abstract method) :
+-> Invalid
+
+2. When extending non-functional interface (having no abstract method, only default method):
+-> Valid
+
+3. Extending functional interface having abstract method with different method signature:
+-> Invalid
+
+4. Extending functional interface having abstract method with same method signature:
+-> Valid, overrides the method in the parent interface
