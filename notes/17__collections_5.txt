@@ -8,7 +8,7 @@ LinkedHashMap
 1. insertion order : retrieve elements in the same way they were inserted
 2. access order : the most frequently accessed element should be present in the front and least at last
 
-- uses doubly linked list internally, where each Node<> is based on HashTable.Node, with before, after links
+- uses doubly linked list internally, where each node, Entry<> class is extended from HashMap.Node, with before, after links
 - .forEach() on linked hash map object iterates using .after link of nodes, hence maintains the insertion order when accessOrder is false ( which is false be default )
 
 ---------------------------------------------------------------------------------------------------
@@ -77,34 +77,20 @@ to access these methods, the object reference CANNOT be stored in Map. because t
 Methods from NavigableMap interface
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
----------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- lowerEntry(K) : return Map.Entry<> for a node having key strictly less than K else null
+- lowerKey(K) : same with key
+- floorEntry(K) : like .lowerEntry(), but with less than or equal to
+- floorKey(k)
+- ceilingEntry(K): return entry with key greater than or equal to K or null
+- ceilingKey(K): for key
+- higherEntry(K) : entry with key strictly greater than K
+- higherKey(K)
+- firstEntry() : return the first entry (key-value) in map
+- lastEntry() : return last entry
+- pollFirstEntry() : return first entry and then remove that entry from map
+- pollLastEntry() : for last entry , get and remove
+- descendingMap() : returns a shallow copy of the map in reverse order. any changes are reflected in both maps
+- navigableKeySet() : returns the keys of the map in order of the map
+- descendingKeySet() : returns the keys of the map in reverse order
+- headMap(K, bool inclusive) : returns the shallow copy for keys less than or equal to K based on inclusive
+- tailMap(K, bool inclusive) : for greater than or equal to

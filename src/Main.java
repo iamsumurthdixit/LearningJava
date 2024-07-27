@@ -400,23 +400,18 @@ public class Main {
 //        desMap.put(1, "A"); desMap.put(2, "B"); desMap.put(3, "C");
 //        desMap.forEach((k, v) -> System.out.println(k + ": " + v)); // 3: C 2: B 1: A
 
-        SortedMap<Integer, String> incMap = new TreeMap<>();
-        incMap.put(5, "A"); incMap.put(8, "B"); incMap.put(2, "C");
-        incMap.put(17, "D"); incMap.put(13, "F"); incMap.put(14, "E");
-        System.out.println(incMap); // {2=C, 5=A, 8=B, 13=F, 14=E, 17=D}
-
-        System.out.println(incMap.headMap(12)); // {2=C, 5=A, 8=B}
-        System.out.println(incMap.tailMap(12)); // {13=F, 14=E, 17=D}
-        incMap.headMap(12).put(2, "X"); // changes reflect vice-versa
-        System.out.println(incMap); // {2=X, 5=A, 8=B, 13=F, 14=E, 17=D}
-
-        System.out.println("smallest key = " + incMap.firstKey()); // 2
-        System.out.println("largest key = " + incMap.lastKey()); // 17
-
-
-
-
-
+//        SortedMap<Integer, String> incMap = new TreeMap<>();
+//        incMap.put(5, "A"); incMap.put(8, "B"); incMap.put(2, "C");
+//        incMap.put(17, "D"); incMap.put(13, "F"); incMap.put(14, "E");
+//        System.out.println(incMap); // {2=C, 5=A, 8=B, 13=F, 14=E, 17=D}
+//
+//        System.out.println(incMap.headMap(12)); // {2=C, 5=A, 8=B}
+//        System.out.println(incMap.tailMap(12)); // {13=F, 14=E, 17=D}
+//        incMap.headMap(12).put(2, "X"); // changes reflect vice-versa
+//        System.out.println(incMap); // {2=X, 5=A, 8=B, 13=F, 14=E, 17=D}
+//
+//        System.out.println("smallest key = " + incMap.firstKey()); // 2
+//        System.out.println("largest key = " + incMap.lastKey()); // 17
 
 
 
