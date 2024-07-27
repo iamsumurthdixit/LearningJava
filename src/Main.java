@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -412,6 +413,42 @@ public class Main {
 //
 //        System.out.println("smallest key = " + incMap.firstKey()); // 2
 //        System.out.println("largest key = " + incMap.lastKey()); // 17
+
+//        Set<Integer> s1 = new HashSet<>();
+//        s1.add(12); s1.add(11); s1.add(33); s1.add(4);
+//        Set<Integer> s2= new HashSet<>();
+//        s2.add(11); s2.add(9); s2.add(33); s2.add(4); s2.add(88); s2.add(10);
+//        System.out.println(s1.addAll(s2)); // true
+//        System.out.println(s1); // [33, 4, 88, 9, 10, 11, 12]
+//        s1.removeAll(s2);
+//        System.out.println(s1); // [12]
+//        s1.add(4); s2.retainAll(s1);
+//        System.out.println(s2); // [4]
+
+//        Set<Integer> threadSafeSet = ConcurrentHashMap.newKeySet();
+//        threadSafeSet.add(1); threadSafeSet.add(2); threadSafeSet.add(3);
+//        Iterator<Integer> iterator = threadSafeSet.iterator();
+//        while(iterator.hasNext()) {
+//            int val = iterator.next();
+//            if(val == 2) {
+//                threadSafeSet.add(99);
+//            }
+//            System.out.println(val); // 1 2 3 99
+//        }
+
+//        Set<Integer> linkedHashSet = new LinkedHashSet<>();
+//        linkedHashSet.add(1); linkedHashSet.add(3); linkedHashSet.add(2);
+//        System.out.println(linkedHashSet); // [1, 3, 2]
+
+//        TreeSet<Integer> treeSet = new TreeSet<>((o1, o2) -> o2 - o1);
+//        treeSet.add(1); treeSet.add(2); treeSet.add(3); treeSet.add(4);
+//        System.out.println(treeSet); // [4, 3, 2, 1]
+
+
+
+
+
+
 
 
 
