@@ -1,16 +1,16 @@
-import com.sun.source.tree.Tree;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.awt.*;
+import java.lang.reflect.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
@@ -241,7 +241,7 @@ public class Main {
 //            System.out.println(annotation); //        @Category(name="bird") @Category(name="livingThing") @Category(name="someAnotherValue")
 //        }
 
-        List<Integer> values = new ArrayList<>();
+//        List<Integer> values = new ArrayList<>();
 //        for (int i = 1; i <= 4; i++) {
 //            values.add(i);
 //        }
@@ -443,6 +443,99 @@ public class Main {
 //        TreeSet<Integer> treeSet = new TreeSet<>((o1, o2) -> o2 - o1);
 //        treeSet.add(1); treeSet.add(2); treeSet.add(3); treeSet.add(4);
 //        System.out.println(treeSet); // [4, 3, 2, 1]
+
+//        List<Integer> numbers = new ArrayList<>();
+//        numbers.add(1); numbers.add(2); numbers.add(3); numbers.add(4);
+//        int count = 0;
+//        for(Integer i : numbers) {
+//            if(i > 2) {
+//                ++count;
+//            }
+//        }
+//        System.out.println(count); // 2
+//        long countMoreThan2 = numbers.stream().filter(a -> a > 2).count();
+//        System.out.println(countMoreThan2); // 2
+//
+//        List<Integer> numList = new ArrayList<>();
+//        numList.add(1); numList.add(2); numList.add(3);
+//        Stream<Integer> numStream = numList.stream();
+//        numStream.forEach(System.out::println);
+//
+//        Integer[] array = new Integer[]{1, 2, 3, 4};
+////        Stream<Integer> arrayStream = Arrays.stream(array);
+//        Stream<Integer> arrayStream = Stream.of(1,2,3,4,5,6);
+//        System.out.println(arrayStream.count()); //6
+//
+//        Stream.Builder<Integer> streamBuilder = Stream.builder();
+//        streamBuilder.add(1).add(2).add(3).add(4).add(5).add(6);
+//        System.out.println(streamBuilder.build().count()); // 6
+//
+//        Stream<Integer> streamFromIterate = Stream.iterate(500, value -> value + 1).limit(5);
+//        System.out.println(streamFromIterate.count()); // 5
+
+//        Stream<String> nameStream = Stream.of("hello", "hi", "how");
+//        Stream<String> filteredStream = nameStream.filter((String name) -> name.length() < 3);
+//        List<String> filteredOutput = filteredStream.toList();
+//        System.out.println(filteredOutput); // [hi]
+//        Stream<String> capitalNamesStream = nameStream.map(String::toUpperCase);
+//        List<String> capitalNames = capitalNamesStream.toList();
+//        System.out.println(capitalNames);
+
+//        List<List<String>> sentenceList = Arrays.asList(
+//                Arrays.asList("a", "b", "c"),
+//                Arrays.asList("d", "e", "f"),
+//                Arrays.asList("g", "h", "i")
+//        );
+//        Stream<String> wordStream = sentenceList
+//                .stream()
+//                .flatMap((List<String> sentence) -> sentence.stream()).map(String::toUpperCase);
+//
+//        System.out.println(wordStream.toList()); // [A, B, C, D, E, F, G, H, I]
+
+//        Integer[] arr = {1,2,3,4,54,3,21,8,47,82,98};
+//        System.out.println(Arrays.stream(arr).sorted((a, b) -> b - a).toList()); // [1, 2, 3, 3, 4, 8, 21, 47, 54, 82, 98]
+
+//        List<Integer> numbers = Arrays.asList(3,2,1,4);
+//        Stream<Integer> numberStream = numbers.stream()
+//                .filter(val-> val > 2)
+//                .peek(System.out::println) // 3 4
+//                .map(val -> -1 * val);
+//        System.out.println(numberStream.collect(Collectors.toList())); // [-3, -4]
+
+//        List<String> numbers = Arrays.asList("2", "1", "4", "7");
+//        IntStream numberStream = numbers.stream().mapToInt(Integer::parseInt);
+//        int[] outputArray = numberStream.toArray();
+//        System.out.println(Arrays.toString(outputArray));
+
+
+//        int[] numberArray = {2, 1, 4, 7};
+//        IntStream numberStream = Arrays.stream(numberArray).filter(a -> a > 2);
+//        int[] outputArray = numberStream.toArray();
+//        System.out.println(Arrays.toString(outputArray));
+
+//        List<Integer> numbers = Arrays.asList(2, 1, 4, 7, 10);
+//        Stream<Integer> numberStream = numbers.stream()
+//                .filter(val -> val > 3)
+//                .peek(val -> System.out.println("after filter: " + val))
+//                .map(val -> val * -1)
+//                .peek(val -> System.out.println("after map: " + val))
+//                .sorted()
+//                .peek(val -> System.out.println("after sorted: " + val));
+//        System.out.println(numberStream.collect(Collectors.toList()));
+
+//        Optional<Integer> numbers = Stream.of(1,2,3,4).min((a, b) -> b - a);
+//        System.out.println(numbers.get());
+
+        long currentTime = System.currentTimeMillis();
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        numbers.parallelStream().map(val -> -1 * val).filter(val -> val < -5).forEach(System.out::println);
+        long elapsedTime = System.currentTimeMillis() - currentTime;
+        System.out.println("Elapsed time: " + elapsedTime); // 2ms
+
+
+
+
+
 
 
 
