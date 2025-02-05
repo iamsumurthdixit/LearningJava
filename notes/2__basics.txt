@@ -70,3 +70,29 @@ Some important points:-
 - because JVM can call main() using the class name only 
 3. the name of the java program file must match the public class within it
 - suppose, there are multiple public classes in file B.java, we have classes public A, public B, public C. now JVM searches for main() inside a public class. when there are multiple public classes, how will the JVM know in which main() is present. hence, there should be exactly 1 public class in which main() should be present. Also, JVM searches main() inside the public class that matches the filename
+
+
+NOTE: main() can be either in public class or in default class.
+
+1. if a class is public -> then its name must match with file name. eg: MyFile.java having public class MyFile
+- javac MyFile.java
+- java MyFile to run it.
+
+2. if a class is default -> then its name does NOT need to match file name, eg: MyFile.java having class DefaultFile
+- javac MyFile.java // first filename to produce bytecode
+- java DefaultFile  // then classname to run the class
+
+3. if the top-level class is protected or private and contains main(), then, main() will not run, compilation error.
+
+4. if the top-level class is public / default and as inner class as protected and inside that main(), then main() will run but using $ sign between outer and inner class. eg:
+javac OuterClass.java
+java OuterClass$ProtectedInner to run main() inside it.
+
+5. In any case, main() CANNOT run if it is inside private class
+
+TLDR: main() can only run if the class conataining it can be accessed by JVM.
+
+VERY IMPORTANT NOTE: private and protected class can ONLY be nested. in both cases, they can be static ( to access outer class's static members only, not instance members ), or non-static ( to access outer class's instance level members )
+
+
+- public static void main(String[] args) MUST be the signature of main() for JVM to find it and run it.

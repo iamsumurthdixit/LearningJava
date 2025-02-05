@@ -58,6 +58,42 @@ decided at runtime that obj is an instance of Doctor, so first it will search fo
 - when the method "does not use any instance variable", ONLY works with the arguments passed to it
 - used as a kind of utility that does some computation and returns the result
 eg: factory design pattern
+------------------------------
+
+
+"METHOD HIDING" in static methods : happens at compile time on static methods, when they get associated to class. so, Parent p = new Child(); will HIDE the implementation of Child, becuase the concept of "overriding" happens at run-time and thus, ONLY applicaple to instance methods. So, static methods without using @Override will HIDE the impl of child class, with using @Override will directly give compilation error.
+
+class Parent {
+    static void display() {
+        System.out.println("Parent static method");
+    }
+}
+
+class Child extends Parent {
+    static void display() {
+        System.out.println("Child static method");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // reference_type object_name = new object_type();
+
+        Parent p = new Parent();
+        Parent c = new Child();
+        Child childRef = new Child();
+
+        // Calls Parent's static method
+        p.display(); // Output: Parent static method
+
+        // Calls Parent's static method because reference type is Parent
+        c.display(); // Output: Parent static method
+
+        // Calls Child's static method because reference type is Child
+        childRef.display(); // Output: Child static method
+    }
+}
+------------------------------
 
 
 
@@ -114,7 +150,8 @@ class Pair {
         this.first = first; 
         this.second = second; 
     }
-    
+
+    // Generic method requires explicit <T, U>
     <T, U> Pair createPair(T first, U second) {
         return new Pair<>(first, second);
     }
@@ -124,9 +161,9 @@ class Pair {
 class Application {
     Object obj; 
     
-    <T> T getOject() {}
+    <T> T getOject() { return (T) obj; }
     
-    <T> List<T> getAll() {}
+    <T> List<T> getAll() { return new ArrayList<>(); }
     
 }
 

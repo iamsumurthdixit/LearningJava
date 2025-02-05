@@ -1,33 +1,83 @@
-Thread pool -
-
-
-collection of threads as worker threads to perform any task
+Thread pool
 
 
 
+Executor: base interface 
 
----------------------------------------------------------------------------------------------------
-
+- void execute(Runnable command): 
+- neeed : decouples task submission from thread creation and management. craeate and manage is taken care by concrete implemenation of Executor ( ThreadPoolExecutor )
 
 ---------------------------------------------------------------------------------------------------
 
 
+ExecutorService : 
 
+- child I of above.
+- for managing lifecyle and "shutting down" ther service. 
+- support for Callable tasks - returning Future of result or exception. 
 
+- submit() methods : return Future for both Callable and Runnable tasks 
+- void shutdown() : prevents new tasks, waits for running and waiting in queue tasks to finish
+- shutdownNow() : prevents new tasks and queue waiting tasks, attempts to stop running tasks. 
+- invokeAll() and invokeAny() for batch operations
+- other lifecycle methods like awaitTermination(time)
+---------------------------------------------------------------------------------------------------
 
+ThreaPoolExecutor : concrete class 
 
+- most commonly used impl of ExecutorService. 
+- manages a pool of worker threads.
+- uses nested private class "Worker" that implements Runnable interface and represents the thread and task to run on it. Worker objects are created by ThreadPoolExecutor for every new task
+- corePoolSize : min number of threads that should remmain in the pool. 
 
+NOTE: when trhead pool is created, by default, there is no worker object OR thread already created. so thread creation policy is as follows : 
+---------------------------------------------------------------------------------------------------
 
+thread creation policy : 
 
+- if the number of the core threads are less than corePoolSize, a new thread will always be created for this new task, even if other core threads are idle.
+- if the number of tasks are more than core threads, then worker objects crated for them remain in the queue if it is not full
+- if queue is full, then new worker objects are created upto "maximumPoolSize". 
+- if that is also reached, queue is also full, then tasks are rejected by one of the policies by "RejectedExecutionHandler" : either use inbuilt or use custom: 
 
+- CallerRunsPolicy : delegate task on caller thread. : MOST preferred - why ? works as a feedback mechanism to caller thread for backpressure / dynamically increase pool size or increasing worker threads methods. 
+- AbortPolicy : raises rjectd exception
+- DiscardPolicy : silently discard
+- DiscardOldestPolicy : pop head of queue and put task there. NOT preferred much
+---------------------------------------------------------------------------------------------------
 
+- longKeepAliveTime : time in ns to wait before terminating idle threads. by default only non-core threads. if allowCoreThreadTimeOut(true) is set, then core threads also die if being idle for this time. 
 
+- BlockingQueue<Runnable> : use ArrayBlocking for bounded, faster due to working on array, use LinkedBlockingQueue for unbounded (in whicih case, max threads will only be created till core pool size). even if bounded, it is slower due to working on linked list node creation and high memory usage. use SynchronousQueue which is of no capacity, directly handle to threads. 
+---------------------------------------------------------------------------------------------------
 
+- ThreadFactory : 
+- used to create threads for Worker objects. 
+- by default factory methods (static here) defined in Executors class is used to create threadpools to group threads under same group, having same parent group. 
+eg : ThreadFactory factory = Executors.defaultThreadFactory(); 
+- Executors class is very much used 
+---------------------------------------------------------------------------------------------------
 
+NOTE: 
+- if want to create all the core htreads before submitting any task, use prestartCoreThreads() to creat ethem in advance. 
+- use "MONITORING TOOLS" like getPoolSize() / getActiveCount() / getTaskCount() / getCompletedTaskCount() for runtime monitoring and scale dynamically. 
 
+usage : web servers, n/w socets / task rejection policies are critical 
+---------------------------------------------------------------------------------------------------
 
+why is a new thread added to queue rather than creating a new thread (upto maxsize) right away ? 
 
+- wasting cpu and memory resources
+- to have controlled scalability of threads 
+---------------------------------------------------------------------------------------------------
 
+NOTE : 
 
+- use "Runtime" class to get more info about threads, processors available to set threads. use profiling tools 
 
+NOTE: 
 
+- private Worker class and ThreadPoolExecutor use atomic classes and Reentrant locks for thread safety. 
+- ExecutorService I has a child abstract class AbstractExecutorService which provides impl of all the methods in ExecutorService and then AbstractExecutorService is extended by ThreadPoolExecutor. 
+
+- submitting a task can be done using .submit() [ preferred ] or using .execute()

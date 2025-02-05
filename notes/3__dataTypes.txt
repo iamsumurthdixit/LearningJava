@@ -133,6 +133,24 @@ why is it called reference ?
 
 NOTE: Unlike C++, there is NO concept of "pass by reference" in java, in C++ it is achieved using pointers. in "java everything is pass by value"
 
+NOTE: by saying pass by value, what is meant is that, in case of primitivs, the a copy of their actual value is passed, so any modifications in any other method are reflected back. in case of reference tyeps ( class/ inteface ), the memory referecne to the object is considered as value, so by convention saying is pass be "value"., internally, it is the mem ref that is considered as value and is passed, so any changes in other method are reflected back. BUT, there is 1 exception to this, reassigning does NOT impact it. eg:
+
+public class Test {
+    public static void modifyObject(StringBuilder sb) {
+        sb.append(" World"); // Modifies the object
+        sb = new StringBuilder("New"); // Reassigns the reference (local only)
+        System.out.println(sb); // Output: "New"
+    }
+    public static void main(String[] args) {
+        StringBuilder sb = new StringBuilder("Hello");
+        modifyObject(sb); // calling method, but reassignment will not impact
+        System.out.println(sb); // Output: "Hello World"
+    }
+}
+---------------------------------------------------------------------------------------------------
+
+
+
 
 
 1. Class : discussed above

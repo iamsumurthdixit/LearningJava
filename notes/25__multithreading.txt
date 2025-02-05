@@ -1,0 +1,121 @@
+Future and CompletableFuture 
+
+
+---------------------------------------------------------------------------------------------------
+
+Future interface
+
+- represents result of an async computaion, proivides methods to check if compuation is complete / cacneeled / waiting for completion 
+- before future :  manually manage threads and their lifcycles, sync complexities as retiriveing result from differnet thread required shared vars. 
+
+-------------------------------------
+- cancel: bool -> if not already completed
+- isCancelled: bool
+- isDone: bool - if compuation is completed successfuly or otherwise
+- T get() : returns the result and waits if neccesary. 
+- T get(timeout): returs timeoutexceptoin 
+- T resultNow(); returns result if completed / exception otherwise WITHOUT waiting 
+- state(): runnign / success / failed / cancelled 
+-------------------------------------
+
+NOTE: for the sake of cancelabliity and DON'T want to get a result for a callable / runnable : use : Future<?> and return null; 
+---------------------------------------------------------------------------------------------------
+
+
+RunnableFuture interface : void run() 
+
+- Runnable (allows to define a task) + Future (return res / excp async): void run()
+- TLDR: complete async form of Runnable interface ( which accpets both sync and async )
+---------------------------------------------------------------------------------------------------
+
+Callable fucntional inteface : V call() throws Exception
+
+
+- returnable version of Runnable 
+- returns result / excetpion. whereas Runnable returs nothing 
+-------------------------------------
+with Runnable -> need shared vars to get the reusutl -> error prone. 
+-------------------------------------
+
+- why used ? 
+-> easily blends with Future 
+- to get the returns 
+-------------------------------------
+
+NOTE: Callable can accept both sync and async tasks like Runnable 
+- used to send tasks in ExecutorService 
+-------------------------------------
+
+General workflow of a Callable : 
+
+1. define a Callable task / use  lamdba expression to override the call()
+2. submit the task to a ExecutorService to execute asynchronously
+3. Retrive the result in a Future in using executor service. otherwise, you can retrive directly in sync. 
+-------------------------------------
+NOTE: using Callable / Runnable for "non-async" tasks is just completely useless, though it is possible. but a simple method can be used for sync invocations in the main thread by invoking .call() or .run() . Callable / Runnable should only be preffered in async tasks ( executing on different threads )
+
+---------------------------------------------------------------------------------------------------
+
+
+FutureTask : conncrete class implements RunnableFuture 
+
+- provides implementation of all the methods in Future and run() in RunnableFuture. 
+- reference can always be held in Future. 
+-------------------------------------
+- other than that, provides 2 methods to wrap Callable and Runnable in a FutureTask as constructor. 
+-------------------------------------
+
+general usage : 
+-> create a runnable / callable task and expect the result in future after executing it on thread or executorservice. 
+-------------------------------------
+eg: 
+
+Callable<Integer> ctask = () -> {
+	Thread.sleep(2000);
+	return 20; 
+};
+
+Future<Integer> ftask = new FutureTask<>(ctask);
+- using diamond operator <> to determine automaticallyabout runnable / callable 
+
+Thread th = new Thread(ftask);
+th.start(); 
+Integer res = ftask.get(); 
+
+---------------------------------------------------------------------------------------------------
+
+
+CompletionStage<T> interface : 
+
+
+
+
+-------------------------------------
+
+
+
+-------------------------------------
+
+
+---------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

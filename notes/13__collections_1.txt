@@ -29,16 +29,37 @@ Iterable interface
 
 /* IMPORTANT UNDERSTANDING HERE */
 
+
+List<Integer> list = List.of(1,2,3,4,5);
+list.forEach(val -> System.out.println(val));
+
+this is theoretically similar to :
+
 default void forEach(Consumer<? super T> action) {
     Objects.requireNonNull(action);
     for (T t : this) {
         action.accept(t);
     }
 }
+
+Consumer<Integer> actionObject = new Consumer<>() {
+    @Override
+    public void accept(Integer t) {
+        System.out.println(t);
+    }
+};
+
+for(Integer val : list) {
+    actionObject.accept(val);
+}
+
+
 this is the implementation of the forEach method, here, what happens is:-
 when you pass a lambda expression into forEach like, (Integer val) -> S.O.P(val); then it matches the signature of the .accept() present in Consumer. ? super T states that any type T and its supertype T can be used as an object. what java does is, it internally creates an anonymous class that implements the Consumer interface, overrides the .accept() with the lambda expression provided, and then creates an object of this class and maps it to `action` variable in the argument. Since, in java, only objects of class that implements an interface can be used in the situation of passing an interface as the argument.
 
 Now, action object has the .accept() implemented with our lambda expression and can invoke it based on the values pointed by `this`. this points to the collections object on which .forEach is called
+
+NOTE: JVM use "invokedynamic", a mechanism for lambdas rather than anonymous classes for performance, however, the concept is theoretically similar.
 
 /* ----------------------------*/
 

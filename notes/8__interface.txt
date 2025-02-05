@@ -76,6 +76,22 @@ Interface implementation:
 3. 1 interface can extend another interface using "extends" keyword
 ---------------------------------------------------------------------------------------------------
 
+static methods in interface :
+
+- static methods in an interface can be called using interface name itself.
+- private methods in interface can also be both static and non-static
+- need of private static -> used by default methods in interface without exposing logic to impl class
+- need of private non-static -> used by default methods with instance-specific logic
+- need of public static -> directly call using interface name, obviously after providing an impl maybe using anonymous class, but not based on instance specific logic ( default method )
+---------------------------------------------------------------------------------------------------
+
+IMPORTANT NOTE:
+
+- static methods can NEVER be abstract anywhere in java.
+- why ? -> because they are tied to class and not instance. keeping anything abstract means to override in any instance, static is not tied to any instance, hence, static is always concrete method.
+
+---------------------------------------------------------------------------------------------------
+
 
 Nested interface:
 

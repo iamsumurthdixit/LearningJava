@@ -25,7 +25,7 @@ advantages:
 - 4 types: 
 	- single : A -> B
 	- multilevel : A -> B -> C
-	- hierarchical : A -> B, A -> C
+	- hierarchical : A -> B, B -> C
 	- multiple : achieved through interface only
 
 advantages: 

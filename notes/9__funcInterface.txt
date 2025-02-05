@@ -9,7 +9,10 @@ Functional Interface  ( SAM : Single Abstract Method )
 NOTE: Object class methods, like String toString(), boolean equals(), when can be written in any interface ( including functional ), and they are NOT required to be implemented in the implementing class or within the interface itself, because their definition is already present in the `Object` class.
 
 
-TLDR: 3 things are allowed in functional interface other than 1 abstract method, static method, Object class defined methods and default methods
+TLDR: 3 things are allowed in functional interface other than 1 abstract method,
+- static methods,
+- Object class defined methods
+- default methods
 ---------------------------------------------------------------------------------------------------
 
 3 ways to implement an interface :

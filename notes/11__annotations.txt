@@ -8,6 +8,13 @@ Annotations
 - can be applied to class, methods, interfaces, fields, parameters etc.
 ---------------------------------------------------------------------------------------------------
 
+Using extra data or annotations is ONLY useful at runtime when :
+- using RUNTIME policy
+- using reflection to get Class object on which annotation is applied, then checking if (MyAnnotation.class) is indeed applied, then taking some action based on that using reflection, like invoking methods, or doing something else.
+- spring also uses this way to manage DI.
+
+---------------------------------------------------------------------------------------------------
+
 2 Types of annotations :
 
 1. Pre-defined :

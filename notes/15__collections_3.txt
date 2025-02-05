@@ -135,6 +135,16 @@ Thread-safe version of ArrayList:
 - CopyOnWriteArrayList : here, every time a new copy of the original list is created and then modification is done using synchronized lock ( for thread safety )
 ---------------------------------------------------------------------------------------------------
 
+serialization of ArrayList
+
+- internal ds (backing array, having size more than number of elements present in it) - transient Object[] elementData;
+- ArrayList has 2 methods, readObject ( from disk and populate elements[] ), and writeObject ( save items of elements on disk )
+- why custom logic ? - to not save extra space of backing array on disk.
+- uses size to determine the number of elements in it to save and retrieve from disk.
+- uses java.io.ObjectOutputStream and java.io.ObjectInputStream for write and read respectively
+
+---------------------------------------------------------------------------------------------------
+
 
 LinkedList
 

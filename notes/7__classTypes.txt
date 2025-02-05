@@ -188,3 +188,21 @@ Types:
 - ALL the data members should be private
 - ONLY getter methods are present, NO setter method
 - ( IMPORTANT ): for data members of type collections ( like list ), ALWAYS return the copy of the data variable, we are allowed to change value of the list (similar) objects in our calling method, but INSIDE the final class, the reference to the list object once initialized SHOULD NEVER change, hence, always return a copy
+----------------------------------------------------------------
+
+
+Use Interface with All Default Methods:
+
+When you need to provide shared behavior across unrelated classes.
+When the primary purpose is to define a contract or capabilities.
+When you want to ensure future-proofing of APIs with minimal changes to client code.
+When you need to implement multiple behaviors in a single class without inheritance issues.
+
+
+
+Use Abstract Class with All Concrete Methods:
+
+When the classes are part of a hierarchy with a common ancestor.
+When you want to provide state (fields) along with methods.
+When there’s a need for "non-public" methods that should not be exposed to implementers.
+When you want to enforce tight coupling among related classes to ensure consistency.

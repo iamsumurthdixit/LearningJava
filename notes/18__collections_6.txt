@@ -73,6 +73,6 @@ NOTE: it is a very basic version of thread-safety and DOES NOT allow concurrent 
 TreeSet
 
 
-- internally uses TreeSet. O(logN) for everything
+- internally uses TreeMap. O(logN) for everything
 - can NOT store null value
 - can provide custom Comparators // eg for Integer: TreeSet<>((o1, o2) -> o2 - o1);

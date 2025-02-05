@@ -1,6 +1,12 @@
 1. Unsafe class - its use
 2. Sync
 3. VarHandle.java OR java.lang.invoke package in general and relation with Sync
+4. what is the purpose of declaring protected fields in a private nested class - checkout Worker in ThreadPoolExecutor
+5. Reachability and WeakReference
+
+
+VarHandle :- class that provides low level atomic operations like CAS etc to perform refleciotn like fucntioanlity in a multi-threaded concurrent environnment. it is thread safe for having refleciotn like access. 
+
 
 
 
