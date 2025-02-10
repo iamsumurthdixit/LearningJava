@@ -126,3 +126,108 @@ Hashtable and ConcurrentHashMap
 - HashMap is NOT thread-safe, does NOT maintain insertion order
 - Hashtable is completely thread-safe, maintains insertions order
 - ConcurrentHashMap is equivalent to Hashtable, thread-safe without synchronization for high-performance
+---------------------------------------------------------------------------------------------------
+
+
+EXAMPLES
+---------------------------------------------------------------------------------------------------
+
+
+String[] words = {"apple", "banana", "apple", "orange", "banana", "apple"};
+Map<String, Integer> map = new HashMap<>();
+for (String word : words) {
+    map.compute(word, (k, v) -> v == null ? 1 : v + 1);
+}
+---------------------------------------------------------------------------------------------------
+   //        vector<vector<int>> g(n);
+           Map<Integer, List<Integer>> g = new HashMap<>(10);
+           // for (auto e : v) {
+   //           g[e[0]].push_back(e[1]);
+           for(int i = 0; i < 10; i++) {
+               g.computeIfAbsent(i, k -> new ArrayList<>()).add(i + 23);
+           }
+           for(int i = 0; i < 10; i++) {
+               g.computeIfAbsent(i, k -> new ArrayList<>()).add(i + 43);
+           }
+           out.println(g);
+//   {0=[23, 43], 1=[24, 44], 2=[25, 45], 3=[26, 46], 4=[27, 47], 5=[28, 48], 6=[29, 49], 7=[30, 50], 8=[31, 51], 9=[32, 52]}
+
+---------------------------------------------------------------------------------------------------
+String[] arr = { "a", "b", "c", "a", "b", "a"};
+
+Map<String, Integer> map = new HashMap<>(Map.of("d", 0, "b", 2));
+for (String s : arr) {
+    map.computeIfPresent(s, (k, v) -> v == null ? 1 : v + 1);
+}
+out.println(map);
+// {d=0, b=4}
+---------------------------------------------------------------------------------------------------
+
+// Nested Map: Subject → (Student ID → Grades List)
+Map<String, Map<Integer, List<Integer>>> studentGrades = new HashMap<>();
+
+// Adding scores for Math, Student 101
+studentGrades
+    .computeIfAbsent("Math", subject -> new HashMap<>())  // Lazy initialize subject
+    .computeIfAbsent(101, studentId -> new ArrayList<>()) // Lazy initialize student list
+    .add(85);  // Add first grade
+
+// Using compute() to modify an existing entry (Eager computation)
+studentGrades.get("Math").compute(101, (id, grades) -> {
+    grades.add(90);
+    return grades; // Return updated list
+});
+
+// Adding Science for Student 102
+studentGrades
+    .computeIfAbsent("Science", subject -> new HashMap<>())
+    .computeIfAbsent(102, studentId -> new ArrayList<>())
+    .add(88);
+
+// Using compute() to add multiple grades in one go
+studentGrades.get("Science").compute(102, (id, grades) -> {
+    grades.addAll(Arrays.asList(75, 95));
+    return grades;
+});
+
+// Print the map
+out.println(studentGrades);
+
+
+{Science={102=[88, 75, 95]}, Math={101=[85, 90]}}
+---------------------------------------------------------------------------------------------------
+
+Map<String, Integer> map = new HashMap<>();
+map.put("Banana", 2);
+map.put("Apple", 5);
+map.put("Cherry", 3);
+
+// Convert Map to List of Entries
+List<Map.Entry<String, Integer>> entries = new ArrayList<>(map.entrySet());
+
+// Sort by Key (Alphabetical Order)
+
+entries.sort(Map.Entry.comparingByKey());
+System.out.println("Sorted by Key: " + entries);
+
+// Sorted by Key: [Apple=5, Banana=2, Cherry=3]
+
+// Sort by Value (Ascending Order)
+
+entries.sort(Map.Entry.comparingByValue());
+System.out.println("Sorted by Value: " + entries);
+
+// Sorted by Value: [Banana=2, Cherry=3, Apple=5]
+---------------------------------------------------------------------------------------------------
+
+Map<String, Double> productPrices = new HashMap<>();
+productPrices.put("Laptop", 1000.0);
+productPrices.put("Phone", 500.0);
+productPrices.put("Tablet", 300.0);
+
+// Apply 10% discount to each product price
+productPrices.forEach((product, price) -> productPrices.put(product, price * 0.9));
+
+out.println(productPrices);
+// {Laptop=900.0, Phone=450.0, Tablet=270.0}
+---------------------------------------------------------------------------------------------------

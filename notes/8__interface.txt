@@ -149,3 +149,26 @@ Java 9 features
 - so what is the use ? - used when there are multiple default methods in an interface that share some common functionality, private methods can be used
 - private methods can be both "static" and "non-static", hence, `private` or `private static`
 - private non-static methods can access all kinds of methods and variables, but private static methods can only access static variables and static methods (both private and public)
+---------------------------------------------------------------------------------------------------
+
+dynamic runtime typecasting of an object to multiple "interfaces" and NOT classes.
+
+- using &
+- used mainly with generics
+- tells the compiler that the object is of type of all the interfaces that are combined using &
+- mainly used for serializability of interfaces.
+
+RULE OF THUMB:
+- this only works with marker interfaces ( that do not have any abstract methods like Serializable, Cloneable ) and all other interfaces joined using & have net 1 abstract method, which is implemented while returning the object with type casting
+
+
+eg:
+Comparator<Person> comparator = getSerializableComparator();
+// this comparator is of both comparator and serializable types.
+people.sort(comparator);
+// now this comparator object can be written to disk and recovered
+
+public static <T extends Comparable<T>> Comparator<T> getSerializableComparator() {
+    return (Comparator<T> & Serializable) (o1, o2) -> o1.compareTo(o2);
+    // runtime dynamic type casting.
+}

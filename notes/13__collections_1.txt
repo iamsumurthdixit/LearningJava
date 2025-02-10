@@ -16,6 +16,18 @@ Collection Hierarchy
 - its child is `Collection` interface
 ---------------------------------------------------------------------------------------------------
 
+VERY IMPORTANT NOTE:
+- List.of(), Map.of(), Set.of() return Unmodifiable collection ONLY. nothing can be removed, modified or added in it
+
+for modifiable version : just pass that into concrete class constructor
+
+List<Integer> list = new ArrayList<>(List.of(1, 2, 3, 4, 5));
+Deque<Integer> stack = new ArrayDeque<>(List.of(1, 2, 3, 4, 5));
+Set<String> set = new HashSet<>(Set.of("Apple", "Banana"));
+Map<Integer, String> map = new HashMap<>(Map.of(1, "One", 2, "Two"));
+
+---------------------------------------------------------------------------------------------------
+
 
 Iterable interface
 

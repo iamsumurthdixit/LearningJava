@@ -47,7 +47,7 @@ Different ways to create a stream
    - it internally calls Arrays.stream() because of variable arguments in of()
    Stream<Integer> arrayStream = Stream.of(1,2,3,4,5,6);
 
-4. from stream builder
+4. from Stream.builder() -> returns Builder object
    - keep calling .add() and then finally call .build()
    - Builder is a nested interface inside Stream interface, hence static.
    - Builder extends Consumer @FunctionalInterface and overrides .accept() by .add()
@@ -57,9 +57,14 @@ Different ways to create a stream
     streamBuilder.add(1).add(2).add(3).add(4).add(5).add(6);
     System.out.println(streamBuilder.build().count()); // 6
 
-5. from stream iterate
+5. using Stream.iterate()
     - works like for loop, seed (starting), increment (lambda func), limit (required because infinite by default)
     Stream<Integer> streamFromIterate = Stream.iterate(500, value -> value + 1).limit(5);
+
+
+6. Stream.generate(Consumer) for infinite stream using some logic, use .limit()
+
+
 ---------------------------------------------------------------------------------------------------
 
 
@@ -74,12 +79,15 @@ List<String> filteredOutput = filteredStream.toList(); // output will not be of 
 System.out.println(filteredOutput); // [hi]
 
 
-2. map(Function<T, R> mapper) : used to transform each element
+2. map(Function<T, R> mapper) : used to transform each element of stream to a new object in the resulting stream
 
 Stream<String> capitalNamesStream = nameStream.map(String::toUpperCase); // optimized method reference
 
 
-3. flatMap(Function<T, Stream<R>> mapper): used to iterate over each element of the complex collection, and helps to flatten it
+3. flatMap(Function<T, Stream<R>> mapper): used to iterate over each element of the complex collection, and helps to flatten it.
+- how it works ? - works for "collection of collections."
+- transforms each collection object into a stream, and then flattens all such streams into a single stream containing all the objects from all the streams.
+- always returns a stream. flatMapToInt, flatMapToDouble, flatMapToLong
 
 List<List<String>> sentenceList = Arrays.asList(
     Arrays.asList("a", "b", "c"),
@@ -91,10 +99,12 @@ Stream<String> wordStream = sentenceList
     .flatMap((List<String> sentence) -> sentence.stream()).map(String::toUpperCase);
 System.out.println(wordStream.toList()); // [A, B, C, D, E, F, G, H, I]
 
+- this flatMap effectively creates stream for each inner list object and then creates a global stream containing all the elements from such streams.
 
-4. distinct() : removes duplicate from stream
 
-5. sorted() : sorts the elements
+4. distinct() : removes duplicate from stream based on Object.equals()
+
+5. sorted() / sorted(Comparator) : sorts the elements
 
 Integer[] arr = {1,2,3,4,54,3,21,8,47,82,98};
 System.out.println(Arrays.stream(arr).sorted((a, b) -> b - a).toList());
@@ -135,6 +145,27 @@ System.out.println(Arrays.toString(outputArray));
 10. mapToDouble
 
 11. mapToLong
+
+NOTE: .boxed() on primitive streams return the Stream<wrapper_class>.
+eg: Stream<Integer> integerStream = IntStream.range(1, 5).boxed();
+
+Stream<Integer> integerStream = IntStream.range(1, 5).boxed();
+List<Integer> integerList = integerStream.toList();
+out.println(integerList); // [1, 2, 3, 4]
+int sum = integerList.stream().mapToInt(Integer::intValue).sum();
+out.println(sum); // 10
+
+
+12. takeWhile(Predicate) - takes element till the predicate matches.
+
+List<Integer> list = Stream.iterate(1, val -> val + 1).limit(10).toList();
+List<Integer> lessThanSix = list.stream().takeWhile(x -> x < 6).toList();
+out.println(lessThanSix); // [1, 2, 3, 4, 5]
+
+13. dropWhile(Predicate) - removes all the elements that match the predicate and returns the remaining
+
+List<Integer> greaterThanSix = list.stream().dropWhile(x -> x <= 6).toList();
+out.println(greaterThanSix); // [7, 8, 9, 10]
 ---------------------------------------------------------------------------------------------------
 
 NOTE: without any terminal operation, peek(println) will not work. because the stream processing ONLY takes place when terminal operation is invoked. hence, intermediate operations are lazy
@@ -188,11 +219,20 @@ numbers.stream().forEach(val -> System.out.println(val));
 - if a specific type is required, pass a lambda to create a desired size array of a type
 
 Integer[] numbers = Stream.of(1,2,3,4,5,6,7,8).toArray((int size) -> new Integer[size]);
+OR
+Integer[] numbers = Stream.of(1,2,3,4,5,6,7,8).toArray(Integer[]::new);
+out.println(Arrays.toString(numbers));
 
+---------------------------------------------------------------------------------------------------
+NOTE: to print arrays, [], use
+1. Arrays.toString(array_name) =  for 1D
+2. Arrays.deepToString(array_name) = for n-D arrays
+---------------------------------------------------------------------------------------------------
 
-3. reduce(BinaryOperator<T> accumulator)
+3. Optional<T> reduce(BinaryOperator<T> accumulator) and T reduce(identity, BinaryOperator<T> accumulator)
 - does associative reduction on the elements of the stream. Performs associative aggregation function
 - Stream has 3 signatures for reduce(). this particular takes a BiFunction and returns Optional
+- T reduce(identity, BinaryOperator<T> accumulator) does not return optional as identity will be present in any case.
 
 Optional<Integer> numbers = Stream.of(1,2,3,4).reduce((Integer a, Integer b) → a + 2 * b);
 numbers.ifPresent(System.out::println);
@@ -201,7 +241,36 @@ numbers.ifPresent(System.out::println);
 
 
 4. collect (Collector<T, A, R> collector)
-- collects the stream items into a list
+- collects the stream items using Collectors.toList() / toSet() / toMap() / groupingBy() / joining() etc.
+
+- toMap()
+List<String> list =  List.of("apple", "banana", "orange", "pear", "pine", "cherry", "guava");
+Map<String, Integer> map = list.stream().collect(Collectors.toMap(fruit -> fruit, fruit -> fruit.length()));
+out.println(map); // {banana=6, orange=6, apple=5, cherry=6, pear=4, pine=4, guava=5}
+
+- groupingBy() -> returns Map<Classifier, List<T>>
+- List<T> is default, Set<T> etc can also be returned by specifying
+
+List<String> list =  List.of("apple", "banana", "orange", "pear", "pine", "cherry", "guava");
+Map<Integer, List<String>> map = list.stream().collect(Collectors.groupingBy(String::length));
+out.println(map); // {4=[pear, pine], 5=[apple, guava], 6=[banana, orange, cherry]}
+
+- partitioningBy(predicate) -> returns Map<Boolean, List<T>>
+
+List<Integer> list =  Stream.iterate(1, val -> val + 1).limit(10).toList();
+Map<Boolean, List<Integer>> parityMap = list.stream().collect(Collectors.partitioningBy(val -> (val & 1) == 1));
+out.println(parityMap); // {false=[2, 4, 6, 8, 10], true=[1, 3, 5, 7, 9]}
+
+- joining() -> concatenates char sequence into a single string
+
+List<Integer> list = Stream.iterate(1, val -> val + 1).limit(10).toList();
+String output = list.stream().map(String::valueOf).collect(Collectors.joining(", "));
+out.println(output); // "1, 2, 3, 4, 5, 6, 7, 8, 9, 10"
+
+List<Character> list = List.of('a', 'b', 'c');
+String output = list.stream().map(String::valueOf).collect(Collectors.joining());
+out.println(output); // "abc"
+
 
 5. min (Comparator<T> comparator) and max (Comparator<T> comparator)
 - find min and max from stream based on the comparator provided
@@ -211,7 +280,7 @@ Optional<Integer> numbers = Stream.of(1,2,3,4).min((a, b) -> b - a);
 System.out.println(numbers.get());
 
 
-6. count() : returns the count
+6. long count() : returns the count
 
 7. anyMatch(Predicate<T> predicate)
 - check if any value in the stream matches the given value and return true / false
@@ -251,3 +320,92 @@ numbers.parallelStream()
     .forEach(System.out::println);
 long elapsedTime = System.currentTimeMillis() - currentTime;
 System.out.println("Elapsed time: " + elapsedTime); // 2ms
+---------------------------------------------------------------------------------------------------
+
+
+FlatMap complex examples
+
+
+class Company {
+    private String name;
+    private List<Department> departments;
+
+    // Constructors, getters, setters
+}
+
+class Department {
+    private String name;
+    private List<Team> teams;
+
+    // Constructors, getters, setters
+}
+
+class Team {
+    private String teamName;
+    private List<Employee> employees;
+
+    // Constructors, getters, setters
+}
+
+class Employee {
+    private String fullName;
+    private List<String> skills; // e.g., ["Java", "SQL", "Leadership"]
+
+    // Constructors, getters, setters
+}
+Q = gather all unique skills across all employees in the company, regardless of department or team
+
+List<Department> departments = company.getDepartments;
+Stream<Team> teamStream = department.stream().flatMap(dept -> dept.getTeams().stream());
+Stream<Employee> employeeStream = teamStream.flatMap(team -> team.getEmployees().stream());
+Stream<String> skillsStream = employeeStream.flatMap(employee -> employee.getSkills().stream());
+Set<String> uniqueSkills = skillsStream.map(String::lowerCase).collect(Collectors.toSet());
+---------------------------------------------------------------------------------------------------
+// POJOs
+// only difference here is there can be multiple users as well but in above example, there was only a single company.
+class User {
+    private String username;
+    private List<Order> orders;
+}
+class Order {
+    private String orderId;
+    private List<LineItem> lineItems;
+    private LocalDate orderDate;
+}
+
+class LineItem {
+    private String productId;
+    private int quantity;
+    private double price;
+    private List<SpecialOffer> specialOffers;
+}
+
+class SpecialOffer {
+    private String offerCode;
+    private String description;
+}
+Q1. How many unique special offers are used across all orders of all users
+
+List<User> users = getUsersFromDatabase();
+
+Set<String> uniqueOfferCodes = users.stream()
+    .flatMap(user -> user.getOrders().stream())
+    .flatMap(order -> order.getLineItems().stream())
+    .flatMap(lineItem -> lineItem.getSpecialOffers().stream())
+    .map(SpecialOffer::getOfferCode)
+    .collect(Collectors.toSet());
+
+Q2. How many times each offer code was used
+- to group order -> groupingBy(), for counting frequency -> counting()
+
+NOTE: Collectors.counting() ALWAYS returns long
+
+Map<String, Long> offerUsageCount = users.stream()
+    .flatMap(user -> user.getOrders().stream())
+    .flatMap(order -> order.getLineItems().stream())
+    .flatMap(lineItem -> lineItem.getSpecialOffers().stream())
+    .collect(Collectors.groupingBy(
+        SpecialOffer::getOfferCode,
+        Collectors.counting()
+    ));
+
