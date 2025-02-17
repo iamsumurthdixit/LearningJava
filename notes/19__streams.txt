@@ -409,3 +409,58 @@ Map<String, Long> offerUsageCount = users.stream()
         Collectors.counting()
     ));
 
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+List<Integer> listA = Stream.iterate(1, val -> val + 1).limit(100).toList();
+        int[] list = new int[100];
+        for(int i = 0; i < list.length; i++) {
+            list[i] = listA.get(i);
+        }
+        int modKey = 19;
+
+        Long sum = Arrays.stream(list)
+            .collect(Collectors.groupingBy(key -> key % modKey, Collectors.counting()))
+            .values().stream().mapToLong(val -> val * (val - 1L) / 2).sum();
+
+        out.println(sum);
+//
+//
+//        Map<Integer, Long> map = new HashMap<>();
+//
+//        for(int val : list) {
+//            int key = val % modKey;
+//            if(map.containsKey(key)) {
+//                map.put(key, map.get(key) + 1L);
+//            } else {
+//                map.put(key, 1L);
+//            }
+//        }
+//
+//        Long sum = 0L;
+//        for(long value : map.values()) {
+//            sum += value * (value - 1L) / 2L;
+//        }
+//        out.println(sum);
+
+//        for(int val : list) {
+//            int key = val % modKey;
+//            map.merge(key, 1L, Long::sum);
+//        }
+
+//        list.forEach(val -> {
+//            int key = val % modKey;
+//            map.put(key, map.getOrDefault(key, 0L) + 1);
+//        });
+
+//        map = list.stream().collect(Collectors.groupingBy(key -> key % modKey, Collectors.counting()));
+    
+

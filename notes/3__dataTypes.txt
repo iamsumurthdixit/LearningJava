@@ -219,7 +219,15 @@ or int brr [][] = { {1, 2, 3}, {2, 4, 5} };
 ---------------------------------------------------------------------------------------------------
 
 
-Wrapper Classes 
+Wrapper Classes
+
+VERY IMPORTANT NOTE:
+- wrapper class object are IMMUTABLE.
+- once created, they can NEVER be modified in same method or in different method.
+- if you try to modify them, a new wrapper class object is created not old one still stays as it is.
+- so DON'T THINK they can be used to modify the values across methods.
+
+
 
 
 - 1 wrapper class for each primitive data type
@@ -235,7 +243,46 @@ double - Double
 - NEED: 
 - primitive data types are allocated memory on stack, so when a primitive data type is passed to another method and that method tries to change its value, the changed value will NOT get reflected in the calling method scope. because, in such case, the new memory for the argument of the method created on stack got cleaned up when control returned to calling method, hence, no change in the value of the primitive type variable 
 
-- wrapper class create objects on heap and the variable holds the memory reference to it. so when that variable is passed to another method, the modified value is reflected because it is directly changed in heap.
+- wrapper class create objects on heap and the variable holds the memory reference to it. so when wrapper class object is passed to a different method, ONLY the memory reference of the wrapper object is passed, not the value. and any change in the value results in creation of new object.
+---------------------------------------------------------------------------------------------------
+
+eg:
+WITHOUT wrapper:
+
+class Test {
+    public static void modify(int x) {
+        x = 20; // Only modifying local copy, original remains unchanged
+    }
+
+    public static void main(String[] args) {
+        int num = 10;
+        modify(num);
+        System.out.println(num); // Still 10 ✅
+    }
+}
+
+WITH wrapper:
+class Test {
+    public static void modify(Integer x) {
+        x = 20; // New Integer object created, original is NOT modified
+    }
+
+    public static void main(String[] args) {
+        Integer num = 10;
+        modify(num);
+        System.out.println(num); // Still 10 ❌
+    }
+}
+---------------------------------------------------------------------------------------------------
+NOTE: to modify the value of primitives across methods :
+
+PREFERRED approach:
+
+1. use arrays: int[] modifyValue = int int[] { 24 };
+now, this can be used to pass across methods and the get the modified value at modifyValue[0].
+
+2. use AtomicInteger and its .set() method.
+ ---------------------------------------------------------------------------------------------------
 
 - Collections library only works with Wrapper classes, not primitives. 
 
@@ -295,3 +342,13 @@ public class Employee {
         System.out.println(ID); 
     }
 }
+
+---------------------------------------------------------------------------------------------------
+
+NOTE: CharSequence is an interface that provides the length() method, all its child classes, String, StringBuilder, StringBuffer thus length() and not size()
+
+NOTE: all the Collection classes, interfaces use size() method. NO length() method is present in them. 
+
+NOTE: arrays use length as a property and not a method 
+
+NOTE: in java, if statements EXPLICITLY take a boolean expression only. Nothing like 0, null can be used. expression must result in a boolean value only.
