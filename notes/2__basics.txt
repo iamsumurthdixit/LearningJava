@@ -59,6 +59,7 @@ In any java program:-
 eg: to compile Employee.java -> write -> javac Employee.java -> Employee.class (bytecode) created
 6. to run the bytecode:-> java Employee -> gets output 
 7. when any changes are done to .java file, first compile and then run because JVM reads bytecode only
+---------------------------------------------------------------------------------------------------
 
 
 
@@ -70,7 +71,7 @@ Some important points:-
 - because JVM can call main() using the class name only 
 3. the name of the java program file must match the public class within it
 - suppose, there are multiple public classes in file B.java, we have classes public A, public B, public C. now JVM searches for main() inside a public class. when there are multiple public classes, how will the JVM know in which main() is present. hence, there should be exactly 1 public class in which main() should be present. Also, JVM searches main() inside the public class that matches the filename
-
+---------------------------------------------------------------------------------------------------
 
 NOTE: main() can be either in public class or in default class.
 
@@ -89,10 +90,53 @@ javac OuterClass.java
 java OuterClass$ProtectedInner to run main() inside it.
 
 5. In any case, main() CANNOT run if it is inside private class
+---------------------------------------------------------------------------------------------------
 
-TLDR: main() can only run if the class conataining it can be accessed by JVM.
+TLDR: main() can only run if the class containing it can be accessed by JVM.
 
 VERY IMPORTANT NOTE: private and protected class can ONLY be nested. in both cases, they can be static ( to access outer class's static members only, not instance members ), or non-static ( to access outer class's instance level members )
 
 
 - public static void main(String[] args) MUST be the signature of main() for JVM to find it and run it.
+---------------------------------------------------------------------------------------------------
+
+Due to type erasure during compilation, all the below things work : 
+
+List[] graph = new List[V];
+List[] graph = new ArrayList[V]; 
+
+for(int i = 0; i < V; i++) {
+	graph[i] = new ArrayList<>();
+}
+
+BUT NOT, List[] graph = new ArrayList<Integer>[V]; 
+
+- because generic array creation is NOT allowed due to generic types are erased during compilation. 
+- BUT the problem in above approaches is that now graph[] is a List that can store anything, Integer, String etc. 
+
+
+Also in the first 2 lines, anything can be stored, Integer, String, Object etc. because at the end, compiler treats it as of type List only. What kind of list ? No information. 
+
+To enforce a type say integer only, modify like: 
+-> Modify LHS with type generic info. 
+
+List<Integer>[] graph = new List[V]; or new ArrayList[V];
+
+-> why new List[V] does not give compilation error? 
+-> because arrays do not preserve type information and above code is considered as raw type. 
+
+NOTE: even though, List<Integer>[] graph = new List[V] is allowed, each item of the array MUST be a concrete class object of List<Integer> only, hence, during initialization : that above for loop. 
+
+
+Anyways, this is not a good practice and will need to use @SuppressWarnings and maybe heap pollution. 
+Use 
+List<List<Integer>> graph = new ArrayList<>(N); 
+for(int i = 0; i < N; i++) graph.add(ArrayList<>());
+NOTE: .set(i, new ArrayList<>()) will ERROR, because .set() only works with index element ALREADY initialized. Only .add() will work. .get() = new ArrayList<>() will also ERROR because it is also used to retrieve an index element ALREADY initialized and present. 
+Hence, to modify structure, of outer list, use .add(new ArrayList<>()). To replace existing inner list, use .set(), and pass a list 
+
+
+VERY IMPORTANT NOTE: List<List<Integer>> graph = new ArrayList<>(Collections.nCopies(N, new ArrayList<>());
+Will NOT work, it will only create 1 inner new ArrayList<>() and point all the indexes of the outer list to that 1 object only. So no matter in which outer index you access, all will pointing to same 1 inner array list. 
+
+	

@@ -23,7 +23,7 @@ ExecutorService :
 - other lifecycle methods like awaitTermination(time)
 ---------------------------------------------------------------------------------------------------
 
-ThreaPoolExecutor : concrete class 
+ThreadPoolExecutor : concrete class
 
 - most commonly used impl of ExecutorService. 
 - manages a pool of worker threads.
