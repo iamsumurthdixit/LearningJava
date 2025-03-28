@@ -172,3 +172,27 @@ public static <T extends Comparable<T>> Comparator<T> getSerializableComparator(
     return (Comparator<T> & Serializable) (o1, o2) -> o1.compareTo(o2);
     // runtime dynamic type casting.
 }
+---------------------------------------------------------------------------------------------------
+
+
+case of referring outer class instance field inside the inner anomymous class : 
+
+class ThreadPoolTaskExecutor {
+    private TaskDecorator taskDecorator; 
+    
+    protected ExecutorService initializeExecutor(ThreadFactory threadFactory) {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(initializing...) {
+            @Override 
+            public void execute(Runnable command) {
+                if(ThreadPoolTaskExecutor.this.taskDecorator != null) {
+                    
+                }
+            }
+        }
+    }
+}
+
+
+OuterclassName.this.fieldName = access outer class instance field inside inner class. 
+eg. ThreadPoolTaskExecutor.this.taskDecorator 
+NOTE: this.taskDecorator would have pointed to the instance of the inner class only, i.e. to the ThreadPoolExecutor. 
