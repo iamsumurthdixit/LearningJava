@@ -1,0 +1,1884 @@
+install docker, kubectl and kind 
+
+- creating KinD cluster of 4 nodes - 1 master, 3 worker
+
+NOTE : in yml, - before value is a list item 
+
+creating config.yml for KinD cluster in kind-cluster-info/config.yml which will sent to api server
+
+ubuntu@ip-172-31-80-51:~/kind-cluster$ cat config.yml 
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+
+nodes:
+- role: control-plane
+  image: kindest/node:v1.31.2
+- role: worker
+  image: kindest/node:v1.31.2
+- role: worker
+  image: kindest/node:v1.31.2
+- role: worker
+  image: kindest/node:v1.31.2 
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
+
+cluster will be running in a docker container, hence, the port will be different of vm and conatiner. so doing port mapping using extraC
+
+NS/ namespace is a group of isolated resources ( pod, serice etc )
+
+
+doing ktl = kubectl 
+
+kubectl get namespaces OR ktl get ns
+
+differnet apps can be run in differnet ns. 
+
+ktl get pods [ this will search in default ns ]
+
+ktl get pods -n kube-system [ in kube-system ns, here contorller manager etc, are present ]
+
+
+-------------------------------------------------------------------------------------------------------
+
+
+Namespace: 
+
+
+
+
+
+to get pods in a ns: 
+
+kubectl get pods -n MYNAMESPC
+
+
+kuebctl create ns nginx
+
+ktl run nginx --image=nginx
+- runs a pod named nginx using image nginx in default ns, NOT in nginx ns created above
+
+kubectl delete pod nginx
+- delets from defalt ns
+
+kubectl run nginx --image=nginx -n nginx 
+
+now, kubectl get pods -n nginx
+------------------------------------------------------------------------------------------------
+
+
+yml files (k8s objects) are called manifests files
+
+
+kubectl delete ns nginx
+------------------------------------------------------------------------------------------------
+
+mkdir nginx 
+cd nginx 
+
+-> now crte manifest file 
+
+only either of 2 things are required 
+
+1. kubectl create ns nginx 
+-> creates a ns, does not update
+
+2. create namespace.yml (anyfile name, just internal things matter ) and then apply (create / update ) using file (-f) file_name
+
+namespace.yml 
+
+kind: namespace
+apiVersion: v1 # k8s version 
+metadata: 
+	name: nginx 
+
+kubectl apply -f namespace.yml 
+, now you can get using 
+
+kubectl get ns 
+
+------------------------------------------------------------------------------------------------
+
+
+
+Pod 
+
+
+
+
+
+in the same folder, 
+
+pod.yml 
+
+kind: Pod
+version: v1
+metadata:
+	name: nginx-pod 
+	namespace: nginx
+spec: 
+	containers: 
+	- name: nginx 
+	  image: nginx:latest
+	  ports: 
+	  - containerPort: 80
+
+
+kubectl apply -f pod.yml 
+now, 
+kubectl get pods -n nginx 
+-> here, nginx-pod will be running in ns nginx 
+
+-> now to enter into this pod, use, meaing, interactiv terminal using bash for the pod name in the namespce  
+
+kubectl exec -it nginx-pod -n nginx -- bash
+
+
+
+to delete the pod, 
+
+kubectl delete -f pod.yml 
+
+------------------------------------------------------------------------------------------------
+
+debugging what happened in the pod: 
+
+kubectl describe pod/nginx-pod -n nginx 
+
+--> it will show how what happened: following happend in order: 
+
+kubectl gave the command to api server to create and run a pod for nginx, api server gave this info to default-scheduler, which planned a worker node on which pod should run and assigned it. then, kubelet on that worker node pulled the nginx image and ran it inside the pod. 
+------------------------------------------------------------------------------------------------
+
+
+Deployment 
+
+
+
+
+- here, "rolling updates" is a feature that is missing in ReplicaSet., ie., here some pods are getting updated with new manifest, others are kept running, no downtime. in ReplicaSet, all the pods will be replaced at a time, downtime will be there. 
+
+
+- replicas created on basis of "labels" and "selectors", i.e, Deployment selects all the pods that match a label, for this to work, the 'template' in this yml (pod info) will be given the label, that must match the selector in the deployment. 
+
+- since the template contains the info of pod, there is no need to have pod using pod.yml, so delete using kubectl delete -f pod.yml 
+
+
+
+
+deployment.yml 
+
+# refer syntx from docs 
+
+kind: Deployment
+apiVersion: apps/v1
+
+metadata: 
+	name: nginx-deployment
+	namespace: nginx
+
+spec: # this spec is of Deployment
+	replicas: 2
+	selector: 
+		matchLabels: 
+			app: nginx 
+
+	template: # this is pod info 
+		metadata: 
+			name: nginx-dep-pod # optional 
+			labels: # this is the label for pod
+				app: nginx 
+
+		spec: # this spec is of pod
+			containers: 
+			-  name: nginx 
+			   image: nginx:latest
+			   ports: 
+			   -  containerPort: 80
+
+
+
+kubectl apply -f deployment.yml 
+
+now, 
+
+-> to get deployment in nginx ns, 
+
+kubectl get deployment -n nginx
+=> nginx-deployment 2/2 ready
+
+-> to get pods in the nginx ns, 
+
+kubectl get pods -n nginx 
+=> it will show 2 pods running
+
+VERY IMPORTANT: 
+- scale the replicas: 
+
+kubectl scale deployment/[deployment_name] -n [namespaceName] --replicas=X
+
+-> kubectl scale deployment/nginx-deployment -n nginx --replicas=5
+
+=> now, 5 pods will be running
+, 
+
+to scale down, 
+
+-> kubectl scale deployment/nginx-deployment -n nginx --replicas=1 
+=> now, only 1 will be running
+
+------------------------------------------------------------------------------------------------
+
+
+Rolling updates in Deployment
+
+-> meaning, updating the image
+
+NOTE: to get more info about the pods, like which worker node they are running on, use 
+
+kubectl get pods -n nginx -o wide
+
+-> updating image: 
+
+--> update image for container named nginx(last param), for given dep, in given ns. 
+
+-> kubectl set image deployment/nginx-deployment -n nginx nginx=nginx:1.26.2
+
+=> at this point, get pods and some will be Running, some will be ContainerCreating, some will be Terminating, this is rolling udpates.
+------------------------------------------------------------------------------------------------
+
+ReplicaSet
+
+
+- same like deployment without rolling udpates. 
+
+
+delete deployment: 
+
+kubectl delete -f deployment.yml 
+
+now, 
+cp deployment.yml replicaset.yml 
+
+and in replicaset.yml, change, 
+
+kind: ReplicaSet
+metadata.name: nginx-replicasets
+
+now, 
+kubectl apply -f replicaset.yml 
+
+again, 2 pods will be running
+------------------------------------------------------------------------------------------------
+
+
+DaemonSet
+
+
+- NOTE that, in Deployment and ReplicaSet, if you get pods using -o wide, and if the replicas are less than worker nodes, some worker nodes will not have container running. 
+
+- here, each worker node will have atleast 1 pod running. 
+
+
+kubectl delete -f deployment.yml 
+
+
+cp replicaset.yml daemonset.yml 
+
+and, 
+1. update the kind: DaemonSet
+2. remove specs.replicas, because, each worker node will have this running. 
+
+
+kubectl apply -f daemonset.yml
+now, 
+
+-> kubectl get pods -n nginx -o wide
+
+=> each worker node will have 1 pod running 
+------------------------------------------------------------------------------------------------
+
+
+Job 
+
+- execute once and finish
+- 2 types: single pod, >1 pod (batch)
+
+
+job.yml 
+
+
+kind: Job
+apiVersion: batch/v1 # parallel on >1 pods 
+
+metadata:
+	name: demo-job
+	namespace: nginx
+
+spec:
+	completions: 1 # execute once and finish
+	parallelism: 1 # no of pods to run 
+
+	template: 
+		metadata: 
+			name: demo-job-pod
+			labels: 
+				app: batch-task
+			spec: 
+				containers: 
+				- name: busy-container
+				  image: busybox:latest
+				  command: ["sh", "-c", "echo hello world && sleep 10"]
+				restartPolicy: Never # after completion applies
+
+kubectl apply -f job.yml 
+
+--> getting a job, 
+
+kubectl get job -n nginx 
+
+=> will show a running job having 0/1 completions for 10s. 
+
+
+after 10s, kubectl get pods -n nginx
+=> will return a pod with status=completed 
+
+-----------
+
+NOTE: to view the logs of a pod: 
+
+1. get the pod name in a namespace: 
+
+kubectl get pods -n nginx
+=> return a pod name wiht demo-job-qqrk
+
+2. get logs: 
+
+kubectl logs pod/demo-job-qqrk -n nginx
+... logs ... 
+
+------------------------------------------------------------------------------------------------
+
+
+CronJob 
+
+
+- job that periodiclyy runs on a schedule 
+
+
+cron-job.yml 
+
+
+
+kind: CronJob
+apiVersion: batch/v1
+
+metadata: 
+	name: minute-backup
+	namespace: nginx
+
+spec: # for cron-job 
+	schedule: "*/2 * * * *"
+	jobTemplate: 
+		spec: # for job template 
+		template: 
+			metadata: 
+				name: minute-backup
+				labels: 
+					app: minute-backup
+
+			spec: 
+				containers: 
+				- name: backup-container
+				image: busybox:latest
+				command: 
+				- sh
+				- -c
+				- > 
+				  echo "Backup Started"; 
+				  mkdir -p /backup &&
+				  mkdir -p /data && 
+				  cp -r /demo-data /backups &&
+				  echo "backup completed"; 
+
+				volumeMounts: 
+				- name: data-volume
+				  mountPath: /demo-data
+				- name: backup-volume
+				  mountPath: /backups
+				
+			restartPolicy: OnFailure
+
+		    volumes: 
+		    - name: data-volume
+		      hostPath:
+		      	 path: /demo-data
+		      	 type: DirectoryOrCreate
+
+		    - name: backup-volume
+		      hostPath: 
+		      	  path: /backups
+		      	  type: DirectoyrOrCreate
+
+
+kubectl apply -f cron-job.yml 
+
+kubectl get cronjob -n nginx 
+=> gets the scheduled pod 
+------------------------------------------------------------------------------------------------
+
+
+Storage 
+
+
+- data in a pod can be lost after pod gets deleted on the worker node, new pod will be created, but what about that data? for that data of tha pod, data is saved on the host using persistent volumes and persistent volume claims 
+
+
+persistentVolume.yml 
+
+
+kind: PersistentVolume
+apiVersion: v1
+
+metadata: 
+	name: local-pv
+	namespace: nginx 
+	labels: 
+		app: local 
+
+spec: 
+	capacity: 
+		storage: 1Gi
+	accessModes: 
+		- ReadWriteOnce
+	persistentVolumeReclaimPolicy: Retain
+ 	storageClass: local-storage
+ 	hostPath: 
+ 		path: /mnt/data
+
+this will "ONLY ALLOCATE 1GiB" memory on host system. 
+
+NOTE that, namespace is not provided so that this volume should eb accessible to all
+
+NOTE 2: added namespace, otherwise, the deployment will fail because deployment is in nginx ns and will not be able to find local-pvc, because omitting ns will result in local-pv and local-pvc to be in default ns. 
+
+kubectl apply -f persistentVolume.yml 
+
+to get the persisten volume: 
+-> kubectl get pv 
+=> it will show 1GiB pv as "available", not claimed, so it must be claimed 
+
+
+
+persistentVolumeClaim.yml 
+
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata: 
+	name: local-pvc
+	namespace: nginx 
+
+spec: 
+	accessModes: 
+		- ReadWriteOnce
+	resources: 
+		requests: 
+			storage: 1Gi # how much i want from the 1Gi pv available, taking all 
+
+		storageClassName: local-storage	
+
+
+before running below command, 1Gi is only avaialble from the host in form of pv, yet not claimed. 
+
+now, 
+
+kubectl apply -f persistentVolumeClaim.yml
+
+now, kubectl get pv 
+-> will show pv reclaim policy as Retain, 
+=-> and, kubectl get pvc
+will show the local-pvc with status bound to local-storage class ( 1 Gi claimed )
+
+
+
+
+
+now, attach this pvc to the nginx depl, so that data of nginx contianer at /var/www/html inside continaer is stored on local-pv on host using local-pvc. 
+
+modify deployment.yml after deleting old one 
+
+
+deployment.yml 
+
+
+... rest is same, updting lowermost spec. 
+
+spec: 
+	containers: 
+	- name: nginx 
+	  image: nginx:latest
+	  ports: 
+	  - containerPort: 80
+	  
+	  volumeMounts: 
+	  - mountPath: /var/www/html
+	  	name: my-volume
+
+	volumes: 
+	- name: my-volume
+	  persistentVolumeClaim: 
+	  	 claimName: local-pvc
+
+for deletion : 
+
+kubectl delete pv/local-pv
+
+kubectl delete pvc/local-pvc
+
+so, local-pvc claim is bound to my-volume, a volume name given here (which will point to local-pv because of claim )
+
+kubectl apply -f deployment.yml 
+
+
+kubectl get pods -n nginx
+=> will show 2 pods running with storage class attached. 
+------------------------------------------------------------------------------------------------
+
+IMPORTANT NOTE: 
+- to verify above thing, 
+
+1. find the worker node on which the pods are running 
+
+kubectl pods -n nginx -o wide
+
+2. this worker nodes in our case are docker containers running in ubuntu, so find the container running as worker node for that pod using 
+
+docker ps
+
+3. enter into that worker node 
+
+docker exec -it 97834h9asgh --bash
+
+4. cd /mnt/data and check if the data from pod is present here. 
+
+------------------------------------------------------------------------------------------------
+
+
+
+Service 
+
+
+- resources like deployment are acesses by the user using service. 
+- expose pods to outer world 
+
+
+service.yml 
+
+
+kind: Service
+apiVersion: v1
+metadata: 
+	name: nginx-service
+	namespace: nginx
+
+spec: 
+	selector: # exposing everything labled as this 
+		app:nginx 
+	ports: 	   
+	  - protocol: TCP 
+		port: 82 # for outer world
+		targetPort: 80 # for contianer port on worker node
+	type: ClusterIP  
+
+
+kubectl apply -f sevice.yml 
+
+
+IMPORTANT NOTE; 
+-> get everything in a ns. 
+
+-> kubectl get all -n nginx
+
+now, if you try to run it using ec2 ip address with port 82 on it, will give error, because, the cluster is a docker contianer, so, port has to be forwarded and exposed. 
+
+sudo -E kubectl port-forward service/nginx-service -n nginx 82:80 --address=0.0.0.l0
+
+
+this will bind the port 82 on ec2 with port 80 on the cluster ip. and forward all the trafic. update the SG of ec2 for incoming traffic on port 82 for all ipv4
+
+------------------------------------------------------------------------------------------------
+
+
+for eg: 
+
+1. get any Dockerfile, build a image, tag and push the image on dockerhub pulic with docker login ( private required extrea acess )
+
+2. create namespace.yml, service.yml and deployment.yml
+
+3. in deployment.yml, update the image of the container under template(pod info) with the name of the image on docker hub 
+
+4. apply all 3 1by1
+
+5. kubectl port-forward service/myapp-service 8000:8000 -n mynamespace --address=0.0.0.0
+
+6. use on ec2ip:8000
+------------------------------------------------------------------------------------------------
+
+
+
+Ingress
+
+
+- exposes http and https routes from outside cluster to services within cluster
+
+- manage traffic and re-routing for >1 Service
+
+- here, in our case, using same namespace for above ns nginx, having 2 service, nginx-service and notes-app-service and having nginx-deployment and notes-app-deployment, all having ns nginx. 
+
+- now, i want /nginx should direct to nginx-service and /app should direct to notes-app-service
+
+-for this, "ingress-controller" is required, this is a nginx controller, on github repo kubernetes/ingress-nginx 
+
+
+IMPORTANT 
+
+use this for ingress nginx in KinD cluster: 
+
+kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
+
+
+=> this will create a ns "ingress-nginx"
+
+-> kubectl get pods -n nginx-ingress
+=> will show a running pod which will be ingress-nginx-controller-973430sdasva
+ 
+
+-> kubectl get services -n nginx-ingress
+=> will show a service ingress-nginx-controller of type LoadBalancer on port 80, 443 
+
+
+
+ingress.yml 
+
+
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata: 
+	name: nginx-notes-ingress
+	namespace: nginx
+	annotations: 
+		nginx.ingress.kubernetes.io/rewrite-target: / 
+spec: 
+	rules:
+	- http: 
+		paths: 
+		- pathType: Prefix 
+		  path: /nginx
+		  backend: 
+		  	service: 
+		  	  name: nginx-service
+		  	  port: 
+		  	  	number: 80
+		- pathType: Prefix 
+		  path: /
+		  backend: 
+		  	service: 
+		  	  name: notes-app-service
+		  	  port: 
+		  	  	number: 8000
+
+
+kubectl apply -f ingress.yml 
+
+:= get ingress in ns nginx 
+-> kubectl get ing -n nginx 
+=> nginx-notes-ingress running on port 80
+
+
+VERY IMPORTANT: now expose the service in the ns ingress-nginx (created by KinD), that has the ingress-nginx-controller of tyep LB, must be exposed now. 
+
+
+kubectl get services -n ingress-nginx
+
+-> ingress-nginx-controller running
+
+expose using below: 
+
+sudo -E kubectl port-forward service/ingress-nginx-controller -n ingress-nginx 8080:80 --address=0.0.0.0
+
+
+explanation of above command: 
+
+creates a tunnel (directing traffic from host machine on all address, 0.0.0.0 on port 8080 to the k8s service running on port 80, http) for the given service. -E preserves the env vars when running the command using sudo. 
+
+
+NOTE that port-forward is only used in local testing, in prod, use LB or ingress-controller
+
+ 
+- open 8080 port on ec2 for incoming traffic 
+
+
+NOTE: Annotations are used to customize ingress specificatoins. learn more about them on ingress annotations on google. 
+
+eg: in above, nginx.ingress.kubernetes.io/rewrite-target: / ; this happens: all rquests on path / will match with 2nd path and will be sent on notes-app service. all requests coming on /nginx will match the first path, but, before invoking the service, path will be rewritten to / and then nginx-service will be invoked, because nginx, like django app defaults to using / as the first page. if not doing this, 404 will return 
+
+------------------------------------------------------------------------------------------------
+
+kubectl delete -f namespace.yml 
+- deletes nginx ns, all things associated with it. 
+
+mkdir mysql && cd mysql 
+------------------------------------------------------------------------------------------------
+
+
+StatefulSet 
+
+
+- for stateless apps like django, sb, deployment, replicaset, daemonset are used. 
+
+- for stateful apps like mysql, mongodb, statefulset is used, where every pod has a "unique identity" 
+
+
+
+
+namespace.yml 
+
+kind: Namespace
+version: v1
+metadata: 
+	name: mysql 
+
+
+kubectl apply -f namespace.yml 
+
+
+
+
+
+NOTE: Service for StatefulSet is a headleass service, i.e., its' cluterIP = None, meaning, this service is NOT accessible by outside world, only for internal use. 
+
+
+service.yml 
+
+kind: Service
+apiVersion: v1
+metadata: 
+	name: mysql-service
+	namespace: mysql 
+spec: 
+	clusterIP: None   # head less service
+	selector:  
+		app: mysql 
+	ports: 
+	- name: 
+		protocol: TCP
+		port: 3306 
+		targetPort: 3306 
+
+
+
+statefulset.yml 
+
+
+kind: StatefulSet
+apiVersion: apps/v1
+metadata: 
+	name: mysql-statefulset
+	name: mysql
+
+spec: 
+	serviceName: mysql-service
+	relicas: 3
+	selector: 
+		matchLabels: 
+			app: mysql 
+	template: 
+		metadata: 
+			labels:
+				app: mysql 
+		spec: 
+			containers: 
+			 -  name: mysql 
+				image: mysql:8.0
+				ports: 
+				-  containerPort: 3306
+				env: 
+				 - name: MYSQL_ROOT_PASSWORD
+				   value: root 
+				 - name: MYSQL_DATABASE
+				   value: devops	
+			    volumeMounts: # creates a pv
+			    - name: mysql-data
+			      mountPath: /var/lib/mysql
+
+	volumeClaimTemplates: # creates a pvc
+	-  metadata:
+	      name: mysql-data
+	   spec: 
+	      accessModes: ["ReadWriteOnce"]
+	      resources: 
+	      	  requests: 
+	      	  	  storage: 1Gi
+
+VERY IMPORTANT NOTE: in statefulset, volume and volumeClaims always goes in the template itself, also, serviceName also goes in that template itself. 
+
+
+
+kubectl apply -f service.yml -f statefulset.yml 
+
+
+now, the pods will numbered (unique identifier attached to them ): 
+
+kubectl get pods -n mysql 
+3 pods: 
+mysql-statefulset-0, mysql-statefulset-1, mysql-statefulset-2
+
+
+NOTE: use watch command that automatically refereshed the context of a command every 2s. 
+
+eg: 
+watch kubectl get pods -n mysql 
+
+
+now, to enter into the msyql pod, say, 
+
+-> kubectl exec -it mysql-statefulset-0 -n mysql -- bash 
+
+=> enters into mysql,
+mysql -u root -p
+use password root, as written in statefulset.yml 
+-> use show databases, will show devops. 
+
+IMPORTANT: 
+delete pod mysql-statefulset-0 -n mysql 
+=> deletes the pod and "recreates a new pod with exactly same name, mysql-statefulset-0". this only happens here, in all 3 other, any random name is given to the pod after recreation
+
+
+------------------------------------------------------------------------------------------------
+
+
+
+ConfigMap
+
+
+configmap.yml 
+
+
+kind: ConfigMap
+apiVersion: v1
+metadata: 
+	name: mysql-config-map
+	namespace: mysql 
+data: # here, spec is not used 
+	MYSQL_DATABASE: devops
+
+
+kubectl apply -f configmap.yml 
+kubectl get configmap -n mysql 
+=> mysql-config-map with 1 data
+
+now, modify the statefulset.yml as:  
+
+env: 
+ - name: MYSQL_ROOT_PASSWORD
+   value: root 
+ - name: MYSQL_DATABASE
+   valueFrom: 
+   	  configMapKeyRef: 
+   	  	 name: msyql-config-map
+   	  	 value: MYSQL_DATABASE 
+
+------------------------------------------------------------------------------------------------
+
+
+Secret
+
+
+- encoded info rather than plaintext as in configMaps
+- for encoding, you can use base64 encoding using: 
+say password = root, 
+
+echo "root" | base64
+cm9vdAo= (this value will be entered)
+
+secrets.yml 
+
+kind: Secret
+apiVersion: v1
+metadata: 
+	name: msyql-secret
+	namespace: mysql 
+data: 
+	MYSQL_ROOT_PASSWORD: cm9vdAo=
+
+
+kubectl apply -f secrets.yml 
+
+now, modify statefulset.yml as : 
+
+
+env: 
+ - name: MYSQL_ROOT_PASSWORD
+   valueFrom: 
+   	  secretKeyRef: 
+   	  	 name: mysql-secret
+   	  	 value: MYSQL_ROOT_PASSWORD
+ - name: MYSQL_DATABASE
+   valueFrom: 
+   	  configMapKeyRef: 
+   	  	 name: msyql-config-map
+   	  	 value: MYSQL_DATABASE 
+
+------------------------------------------------------------------------------------------------
+
+
+scaling and scheduling 
+
+
+
+Resource quotas and limits: 
+
+why needed ? - otherwise a single pod may take up all the resources ram, cpu in the worker node and other pods will not will be to work. 
+
+- at container level, specify resources.requests (min) and resources.limits (max) in the Deployment / StatefulSet etc. 
+
+- also possible on pod level 
+
+
+nginx/deployment.yml 
+
+
+containers: 
+	- name: nginx
+	  image: nginx:latest
+	  ports: 
+	  -  containerPort: 80
+	  resources: 
+	  	 requests:
+		     cpu: 100m
+		     memory: 128Mi
+	  	  limits: 
+		     cpu: 200m
+		     memory: 256Mi
+
+now use kubectl describe podName -n nginx to see them
+
+------------------------------------------------------------------------------------------------
+
+
+
+
+Probes 
+
+- request for pod health 
+
+3 types: 
+1. liveness probe: request for checking if the pod is active on a port number 
+2. readiness probe: if pod is ready 
+3. startup probe: if the pod is started
+
+notes-app/deployment.yml
+
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+	name: notes-app-deployment
+	namespace: nginx
+	labels:
+		app: notes-app
+spec:
+	replicas: 1
+	selector: 
+	matchLabels: 
+		app: notes-app
+	template: 
+		metadata: 
+			labels: notes-app
+		spec: 
+			containers:
+			- name: notes-app
+			  image: iamsumurth/notes-app-k8s
+			  ports: 
+			  	- containerPort: 8000
+
+			  livenessProbe: # if pod is healthy
+			  	 httpGet: 
+			  	 	path: /
+			  	 	port: 8000
+			   readinessProbe: # if pod is ready
+			   	  httpGet: 
+			   	  	path: /
+			   	  	port: 8000
+------------------------------------------------------------------------------------------------
+
+
+Taints and Tolerations 
+
+
+taint - telling the kube scheduler to NOT schedule the pod on the tainted worker node. 
+
+Tolerance - running the pod on the tainted worker
+
+
+for Taint: 
+
+1. get the nodes:
+kubectl get nodes 
+=> 4 nodes, 
+tws-cluster-control-plane
+tws-cluster-worker
+tws-cluster-worker2
+tws-cluster-worker3
+
+-> taint 1 by 1 each worker node using below, which tells the default-scheduler to NOT schedule any pod on the tainted worker unless they have a tolerace for key prod=true, 
+
+-> kubectl taint node tws-cluster-worker prod=true:NoSchedule
+
+-> if all the nodes are tainted and try to run the pod say, 
+kubectl apply -f pod.yml (for nginx), 
+and then do kubectl get pods -n nginx, the status will show 0/1 running, if you describe that pod, it will show, no node available for scheduling. 
+
+-> the control-plane is always tainted, so no pod gets scheduled on it. 
+
+
+=> untaint a tainted worker: 
+
+just write - at the end of taint cmd: 
+
+kubectl taint node tws-cluster-worker prod=true:NoSchedule-
+
+will untaint and just after that the pod will get scheduled on this node, (because entry possible now) 
+
+
+Toleration
+
+pod.yml 
+
+
+kind: Pod
+apiVersion: v1
+metadata: 
+	name: nginx-pod 
+	namespace: nginx
+spec: 
+	containers: 
+		- name: nginx
+		  image: nginx:latest
+		  ports: 
+		  	 containerPort: 80
+
+	tolerations: 
+	  - key: "prod"
+		operator: "Equal"
+		value: "true"
+		effect: "NoSchedule"
+
+=> this will schedule the pod on the node matching the toleration in worst case 
+------------------------------------------------------------------------------------------------
+
+
+HPA VPA KEDA
+
+HPA on stateless, VPA on stateful pods like dbs based on metrics 
+
+- for getting metrics, Metrics API should be present in kube-system namespace
+
+- for a KinD cluster, do this to install metrics server: 
+
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+
+refer HPA-VPA on kubestarter repo of trainwithshuham github for further steps to configure metrics metrics-server
+
+
+to get the metrics, use : 
+
+-> for node level: 
+kubectl top node 
+
+-> for pod level: 
+kubectl top pod -n nginx 
+------------------------------------------------------------------------------------------------
+
+
+practical for hpa using apache 
+
+
+mkdir apache 
+
+
+namespace.yml 
+
+kind: Namespace
+apiVersion: v1 
+metadata: 
+	name: apache
+
+
+
+
+
+
+deployment.yml  
+
+kind: Deployment 
+apiVersion: apps/v1 
+metadata: 
+	name: apache-deployment 
+	namespace: apache 
+spec: 
+	replicas: 1
+	selector: 
+		matchLabels: 
+			app: apache 
+	template:
+		metadata: 
+			name: apache 
+			labels: apache
+	 	spec: 
+	 		conatiners: 
+	 		-  name: apache 
+	 		   image: httpd:latest 
+	 		   ports: 
+	 		    -  containerPort: 80
+	 		resources: 
+	 			rquests: 
+	 				cpu: 100m 
+	 				memory: 128Mi
+	 			limits: 
+	 				cpu: 200m 
+	 				memory: 256Mi
+
+
+
+service.yml
+
+kind: Service
+apiVersion: v1 
+metadata: 
+	name: apache-service
+	namespace: apache 
+spec: 
+	selector: 
+		app: apache
+	ports: 
+	-  protocol: TCP 
+	   port: 80 # in cluster 
+	   targetPort: 80 # container port
+	type: ClusterIP
+
+
+
+
+-------------------------------------------
+NOTE: to send a request to a Service from within the cluster, internal DNS (created by k8s, that is by default not exposed) can be used. for this to work, 
+
+1. get into a pod (getting into a cluster) 
+
+kubectl exec -it <podName> -n <namespace> -- bash 
+
+2. access the service <myService> using curl 
+
+eg: curl http://myService.mynamespace.svc.cluster.local 
+-------------------------------------------
+
+
+expose the apache-service on ec2 by incoming on port 82 for custom tcp and 
+
+sudo -E kubectl port-forward service/apache-service -n apache 82:80 --address=0.0.0.0
+
+
+
+now, for manual scaling, 
+
+kubectl scale deployment apache-deployment -n apache --replicas=3
+
+
+now, for HPA, 
+
+
+hpa.yml 
+
+
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2 
+metadata: 
+	name: apacha-hpa
+	namespace: apache 
+
+spec: 
+	scaleTargetRef: # what to scale 
+		kind: Deployment
+		name: apache-deployment
+		apiVersion: apps/v1
+
+	minReplicas: 1
+	maxReplicas: 5
+
+	metrics: 
+	  - type: Resource # based on resource
+	  	resource: 
+	  		name: cpu
+	  		target: 
+	  			type: Utilization
+	  			averageUtilization: 5 # in % 
+
+
+
+kubectl apply -f hpa.yml 
+
+now get hpa using: 
+
+kubectl get hpa -n apache 
+
+
+----------------- 
+
+testing hpa using stress testing pod by image busybox
+
+NOTE kubectl run is used to run a pod directly using a image by pulling it 
+
+-> here, load-generator (podname) is run using image busybox, at /bin/sh (because it doest not contain bash terminal)
+
+
+-> kubectl run -i --tty load-generator --image=busybox -n apache /bin/sh 
+
+=> gets into the shell of this pod, then run the following command to put load on the apache-service (having apache-deployment of apache containers, NOTE that, this load-generator is NOT a part of any service, it only exists in the apache ns) 
+
+-> while true; do -q -O- wget http://apache-service.apache.svc.cluster.local; done
+
+
+now, see the hpa to see the metrics (optional) 
+
+kubectl get hpa -n apache 
+
+and check the number of pods using : 
+
+
+kubectl get pods -n apache
+=> will show 5 pods running ( due to excessive traffic) 
+------------------------------------------------------------------------------------------------
+
+
+VPA 
+
+
+
+- for this, download 
+git clone https://github.com/kubernetes/autoscaler.git 
+
+
+cd autoscaler/vertical-pod-autoscaler
+
+refer above things from readme from the above repo 
+
+
+vpa.yml 
+
+
+kind: VericalPodAutoscaler
+apiVersion: autoscaling.k8s.io/v1
+metadata: 
+	name: apache-vpa
+	namespace: apache
+spec: 
+	targetRef:
+		name: apache-deployment
+		apiVersion: apps/v1
+		kind: Deployment
+	updatePolicy: 
+		updateMode: "Auto"
+
+kubectl apply -f vpa.yml 
+
+-> watch changes in vpa every 2s to see the cpu extended after doing load testing like above 
+
+watch kubectl get vpa -n apache 
+ 
+-> for cpu and memory of pod
+kubectl top node -n apache
+
+------------------------------------------------------------------------------------------------
+
+
+Node affinity 
+
+applying something to have preferecen of the pods to get scheduled on some works matching some criteria 
+
+
+------------------------------------------------------------------------------------------------
+
+
+
+Role based access control 
+
+
+2 parts: 
+1. Service accounts
+	- at namespace level 
+		- Role
+		- Role binding
+2. user 
+	- at cluster level 
+		- cluster role
+		- cluster role binding
+
+
+commands using kubectl auth 
+
+cd apache
+
+
+NOTE: 
+
+-> kubectl auth whoami 
+- Username: kubernetes-admin
+- Groups: [kubeadm:cluster-admin system:authenticated]
+
+
+now, to check what i can do, 
+use kubectl auth can-i 
+
+eg: 
+
+
+kubectl auth can-i get pods
+-yes
+
+kuebctl auth can-i get deployment -n apache
+- yes
+
+kuebctl auth can-i delete deployment apache-deployment -n apache 
+- yes
+
+
+now, as cluster-admin (defualt), i can do everything, so creating roles
+
+
+- apiGroups are apiVersion before /v1 or /v2. "" means apiVersion is only v1 or v2. 
+
+
+---------------------------------------------------------------------
+
+
+
+
+Service role: 
+
+role.yml 
+
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata: 
+	name: apache-manager
+	namespace: apache
+
+roles: 
+  - apiGroups: ["", "rbac.authorization.k8s.io", "batch"]
+    resources: ["deployment", "pod", "service"] # access given
+    verbs: ["get", "apply", "delete", "watch", "patch", "create", "list"]
+
+
+kubectl apply -f role.yml 
+
+kubectl get role -n apache
+
+
+for every service role, there will be a role binding "to a Service account"
+
+
+service-account.yml # treat as a real world user only 
+
+
+kind: ServiceAccount
+apiVersion: v1
+metadata: 
+	name: apache-user
+	namespace: apache
+
+kubectl apply -f service-account.yml
+
+-> kubectl get serviceaccount -n apache
+=> will show 2 user, default and apache-user
+
+
+
+now, user (apache-user) is created, role is created, but not binded. 
+
+currently, as default user: 
+
+kubectl auth can-i get pods -n apache 
+=> yes (default) 
+
+kubectl auth can-i get pods -n apache --as=apache-user
+=> no, because no binding yet. 
+
+
+
+role-binding.yml 
+
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+	name: apache-user-rolebinding
+	namespace: apache
+
+
+subjects: # mapping U-R
+
+- kind: User  # here kind means type
+  name: apache-user
+  apiGroup: rbac.authorization.k8s.io
+
+roleRef: 
+   kind: Role
+   name: apache-manager
+   apiGroup: rbac.authorization.k8s.io
+
+kubectl apply -f role-binding.yml
+
+
+kubectl get rolebinding -n apache
+=> apache-manager-rolebinding with Role/apache-manager
+
+
+VERY IMPORTANT NOTE: service account and role works at namespace level, so for every can-i command, must include ns 
+
+-> kubectl auth can-i get pods --as=apache-user -n apache 
+=> yes
+
+
+VERY IMPORTANT NOTE: after modifying any yml, must run apply command in all associated yml files to take effect 
+
+
+---------------------------------------------------------------------
+
+
+
+
+Cluster role 
+
+
+- for things like logging, mointoring etc for entire cluster 
+
+
+
+mkdir dashboard
+
+- apply raw yml files for setting up dashboard
+
+IMPORTANT: 
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yml 
+
+=> creates many things including a ClusterRole (with name cluster-admin) and a ns kubernetes-dashboard and a , in which we need to set up a service account as a admin user. so in the below file, only ClusterRoleBinding will be created and not role, because role is alredy created by above command 
+
+NOTE: use 
+kubectl get clusterrole -n apache if required
+
+
+TLDR; kubernetes-dashboard ns is used here and cluster-admin ClusterRole is used here. 
+
+
+
+
+dashboard-admin-user.yml 
+
+kind: ServiceAccount
+apiVersion: v1 
+metadata: 
+	name: admin-user
+	namespace: kubernetes-dashboard
+
+---  # this creates another yml file in same file
+
+
+kind: ClusterRoleBinding
+apiVersion: v1
+metadata: rbac.authorization.k8s.io
+	name: admin-user-binding
+	namespace: kubernetes-dashboard
+
+subjects: 
+-   kind: ServiceAccount
+	name: admin-user
+	namespace: kubernetes-dashboard
+
+roleRef:
+-  	kind: ClusterRole
+	name: cluster-admin 
+	apiGroup: rbac.authorization.k8s.io
+
+
+kubectl apply -f dashboard-admin-user.yml 
+
+  
+
+
+VERY VERY IMPORTANT
+- access the cluster 
+
+IMPORTANT NOTE: to access the cluster, a token is required and kubectl proxy is required
+
+
+
+1. create token: request
+
+kubectl -n kubernetes-dashboard create token admin-user
+
+=> creates token for admin-user in ns and displays on screen 
+
+
+2. kuebctl proxy --port=8001 --address=0.0.0.0 --accept-hosts:'.*'
+
+to run the cluster
+
+=> maybe cluster is acessible at 8001 port
+
+
+3. set incoming on ec2 on 8001 for custom tcp 
+
+
+
+now, the k8s dashboard is acessible at 
+
+1. open url:
+
+http://ec2ip:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+2. paste the token generated above 
+
+NOTE: this thing only work in localhost or https. run in localhost after cloning a git repo
+---------------------------------------------------------------------
+
+
+Custom Resource Definition 
+
+
+
+- creaing objects that don't exists in k8s 
+
+NOTE: apiVersion = group name + version, eg: 
+apiVersion = apiextensions.k8s.io/v1, then, group = apiextensions.k8s.io
+version = v1 
+
+
+eg: 
+
+
+devops-crd.yml 
+
+
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1
+
+metadata: 
+	name: devopsbatches.trainwithshuham.com
+spec: 
+	group: trainwithshuham.com
+	names: 
+		plural: batches
+		singular: batch
+		kind: DevOpsBatch
+		shortNames: 
+			- junoon
+			- batches
+			- tws
+
+	scope: Namespaced
+	versions: 
+	 	- name: v1
+	 	  served: true
+	 	  storage: true
+	 	  schema: 
+	 	  	 openAPIV3Schema:
+	 	  	 	 type: object
+	 	  	 	 properties: 
+	 	  	 	 	 spec: 
+	 	  	 	 	 	type: object
+	 	  	 	 	 	properties: 
+	 	  	 	 	 		name: 
+	 	  	 	 	 			type: string
+	 	  	 	 	 			description: "name of deveops batch" 
+	 	  	 	 	 		duraion: 
+	 	  	 	 	 			type: string
+	 	  	 	 	 			description: "duratoin of batch"
+	 	  	 	 	 		mode: 
+	 	  	 	 	 			type: string
+	 	  	 	 	 			description: "something"
+	 	  	 	 	 		platform: 
+	 	  	 	 	 			type: string
+	 	  	 	 	 			description: "heheheh"	t
+
+---------------------------------------------------------------------
+
+
+
+Helm 
+
+
+
+
+mkdir helm 
+- install helm 
+
+
+installing apache charts: 
+
+
+-> helm create apache-helm 
+=> apache-helm dir will be created having 
+
+
+apache-helm/
+	Chart.yaml
+	charts/
+	templates/
+		NOTES.txt
+		_helpers.tpl
+		deployment.yaml
+		hpa.yaml
+		ingress.yaml
+		service.yaml
+		serviceaccount.yaml
+		tests/
+			test-connection.yaml
+	values.yaml 
+
+Chart.yaml is used for helm chart related config. values.yaml is used for templates files
+
+
+:= packaging the chart.. 
+
+cd ..
+helm package apache-helm/
+
+=> apache-helm-0.1.0.tgz produces in same location 
+
+---------------------------------
+
+
+creating 3 envs, dev, staging, prod using chart. 
+
+
+helm install dev-apache apache-helm
+=> will deploy everything in default ns
+
+to uninstall, use: 
+helm uninstall dev-apache
+
+---------------------------------
+
+
+installing chart in a namespace (using -n flag) using the configured chart, apache-helm/
+
+following commands will deploy 2 pods in each ns. 
+
+
+helm install dev-apache apache-helm -n dev-apache --create-namespace 
+
+
+helm install prd-apache apache-helm -n prd-apache --create-namespace
+
+
+to view pods: 
+
+kubectl get pods -n dev-apache
+=> 2 pods running. 
+
+---------------------------------
+
+
+upgrading cluster with successive revision (release) , like replicas, 
+
+
+
+
+1. update replicaCount in values.yaml 
+
+2. now update the version of Chart.yaml, say, 
+appVersion: "1.16.0" -> "1.16.1"
+
+3. helm package apache-helm
+-> new packaged chart will be save 
+
+4. now, run upgrade command: 
+
+helm upgrade prd-apache ./apache-helm -n prd-apache
+
+=> release "prd-apache" will be upgraded, deployed in ns prd-apache in revision=2
+
+
+now, in dev-apache, 2 pods and in prd-apache, 3 pods will be running 
+
+
+Rolling back the release to a previous release: 
+
+
+helm rollback <revision> -n ns
+
+eg: helm rollback 1 -n prd-apache
+
+=> will roll back and only 2 pods will be running 
+---------------------------------
+
+adding stable repository:
+
+
+helm repo add stable https://charts.helm.sh/stable
+=> "stable" added to your repositorys
+
+
+installing nginx from pre-built config from artifactory
+
+-> helm install nginx-helm oci://registry-1.docker.io/bitnamicharts/nginx 
+
+-> helm uninstall nginx-helm
+
+NOTE: above commands will work in default ns, use -n <namespace> --create-namespace 
+---------------------------------------------------------------------
+
+
+
+Init container, sidecar container
+
+both written in kind: Pod
+
+
+mkdir pods
+
+
+init-container.yml 
+
+
+kind: Pod
+apiVersion: v1
+metadata:
+	name: init-test
+
+spec: 
+	initContainers: # run and then end 
+	- name: init-container
+	  image: busybox:latest
+	  command: ["sh", "-c", "echo 'initializatoin started ... '; sleep 10; echo 'initializatoin completed'"]
+
+	containers: # main containers
+	- name: main-container
+	  image: busybox:latest
+	  command: ["sh", "-c", "echo 'main container started after 10s'"]
+
+
+
+
+kubectl apply -f pod.yml 
+
+=> to get the logs for the pod init-test, use -c <container> 
+
+kubectl logs init-test -c init-container 
+kubectl logs init-test -c main-container
+
+
+
+
+sidecar-container.yml 
+
+
+
+
+kind: Pod
+apiVersion: v1
+metadata:
+	name: sidecar-test
+spec: 
+	containers: 
+		- name: main-container # say, produce logs
+		  image: busybox
+		  command: ["sh", "-c", "while true; do echo'hello world' >> /var/log/app.log; sleep 5; done"]
+
+		  volumeMounts: 
+		  	  - name: shared-logs 
+		  	    mountPath: /var/log
+
+		- name: sidecar-container # say display logs
+		  image: busybox
+		  command: ["sh", "-c", "cat /var/log/app.log"]
+
+		  volumeMounts: 
+		  	  - name: shared-logs 
+		  	    mountPath: /var/log
+
+	volumes:
+		- name: shared-logs
+		  emptyDir: {}
+
+---------------------------------------------------------------------
+
+
+
+
+Istio service mesh 
+
+
+mkdir istio-practice
+cd istio-practice
+
+download istio: 
+
+curl -L htts://istio.io/downloadIstio | sh -
+
+
+using kind for istio cluster creation: 
+
+
+kind create cluster --name istio-testing 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
