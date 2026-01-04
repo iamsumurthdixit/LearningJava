@@ -206,3 +206,241 @@ When the classes are part of a hierarchy with a common ancestor.
 When you want to provide state (fields) along with methods.
 When there’s a need for "non-public" methods that should not be exposed to implementers.
 When you want to enforce tight coupling among related classes to ensure consistency.
+---------------------------------------------------------------------------------------------------
+
+PECS Rule, applied only to wildcards
+----------------------------------------------
+consider := Object -> Animal -> Dog -> Poodle
+
+
+1. CS ( ? super T ) | Lower bound | Aka accepts "at least T" (can accept T or any supertype)
+- Safe to write as T
+If a generic object "consumes" items from you (you write into it), use ? super T
+why super here ?
+- suppose you have, List<? super Dog> dogs;
+- now the list can actually be
+
+List<Dog>
+List<Animal>
+List<Object>
+
+all the above lists can consume Dog object.
+so you can insert Dog (or any subtype of Dog, Poodle) into the list.
+but you can read only Object, because you don't know the exact type.
+
+eg:
+List<Object> objects;
+List<? super Dog> dogs = objects;
+
+now, Dog, Poodle can be written into it.
+but ONLY Object can be read from it. because you don't know
+
+reason 1. that `objects` is of type Dog or Animal or Object
+reason 2. you don't know what other type could be present in the list.
+
+eg: objects could contain Integer or String already before being
+assigned as List<? super Dog> dogs = objects, since, the underlying
+list is same, only another reference variable is being used, you are not
+sure about what actual types of elements could be present in it. Hence,
+only using Object can be read from it.
+
+NOTE: if you use:
+List<Animal> animals;
+List<? super Dog> dogs = animals;
+then can you read as Animal from dogs list ?
+answer := No. because the java's type system considers "ALL" superclass
+possibilities when doing ? super Dog. that cover, Dog, Animal, Object.
+
+because, later it is also possible to do
+dogs = new ArrayList<Object>(); // why->  because the [ ? super Dog ] makes it valid
+
+Hence, Write as: T or any subtype of T
+        Read as: Object ( also called lower bound )
+        and the collection can contain T or any supertype of T
+----------------------------------------------
+
+2. PE ( ? extends T ) | Upper Bound | Aka produces "at most T" (can produce T or subtype of T)
+- safe to read as T
+If a generic object "produces" items for you (you read from it), use ? extends T.
+Why extends here?
+- suppose you have, List<? extends Animal> animals;
+- now the list can actually be,
+
+List<Animal>
+List<Dog>
+List<Poodle>
+
+all the above lists produce Animal object only.
+every element is at-least an Animal
+
+so you can always Read as an Animal
+but when it comes to writing,
+
+suppose, the actual list is:
+
+List<Poodle> poodles;
+and
+List<? extends Animal> animals = poodles;
+inserting
+case 1: Dog into animals: not possible, because Dog is not necessarily a Poodle.
+there can be other implementations of Dog as well
+
+case 2: Animal into animals: not possible, because Poodle is not the only Animal
+
+case 3: Poodle into animals: not possible, for this think it this way:
+you have,
+
+List<Poodle> poodles;
+List<? extends Animal> animals = poodles;
+
+reason 1. now compiler assumes animals can be Animal or "any" subtype of it.
+Animal -> Dog / Cat -> Poodle / German etc.
+
+now assume, Animal -> Dog -> Poodle -> BabyPoodle
+are all valid on animals;
+now, the compiler can "assume" (if the list had been), that the list of type BabyPoodle,
+then, you cannot insert Poodle into the list.
+
+reason 2. because this is valid later,
+that you can reassign the animals to any other subclass of Animal,
+List<Dog> dogs;
+animals = dogs; // valid.
+now, here, you cannot insert Poodle, as not every Dog is meant to be Poodle.
+
+Hence, Read as : T ONLY ( not any subtype ) also called upper bound
+      Write as : null
+      and the collection can contain T or any subtype of T
+----------------------------------------------
+
+Functions having input output based on wildcards:
+
+1. Input: consumed, CS, (? super T)
+- method accepts object of type T or any supertype of T.
+- makes the method to accept a wider range of objects.
+- but looses the flexibility of using methods defined in T, but not in superclasses.
+- to overcome the above problem, define methods that DO get overwritten in child classes
+- basically Liskov Subs.
+- and if you don't make use of overridden methods, the only fallback is to check at runtime
+using instanceof (type-switching), which actually regains the methods but breaks the liskov
+Refer below Visitor pattern for this.
+
+eg: instead of
+void handle(Poodle p)
+void handle(Dog d)
+
+2. Output: produced, PE (? extends T)
+- method produces object of type T or any subtype of T.
+
+eg: instead of writing
+Dog handle(Dog d)
+Animal handle(Dog d)
+----------------------------------------------
+
+How Visitor pattern solves the problem:
+
+problem: you have in CS
+
+void handle(Animal a) {
+    if (a instanceof Dog d) {
+        d.bark();
+    } else if (a instanceof Cat c) {
+        c.meow();
+    }
+}
+-> breaking Liskov
+bigger question:-> what if i want to add many more operations without breaking liskov
+
+solution 1: put everything in Animal
+- everytime a new operation in Animal, modify EACH subclass (violates open-closed principle)
+abstract class Animal {
+    abstract void feed();
+    abstract void wash();
+    abstract void vaccinate();
+}
+
+solution 2: single method, type switching, (violates liskov)
+public void feed (Animal a) {
+    if (a instance of Dog) { ... }
+    if (a instance of Cat) { ... }
+}
+
+solution 3: Visitor
+when to use Visitor: when the variations are limited ( limited subclasses ), but high number of operations (visitors)
+
+key: separate what an object "is" from what it "does" and let dynamic dispatch choose the correct
+behavior
+
+part 1. separate the operation as an interface
+- each subclass of this will define a specific operation, eg, feed, wash, etc.
+- function overloading by each concrete business subclass, Dog, Cat etc. for Animal
+- basically each method is responsible to handle 1 specific subclass
+
+interface AnimalVisitor {
+    void visit(Dog d); // or make it default void visit(Dog d) { UnsupportedException() }
+    void visit(Cat c);
+}
+
+part 2. allow the method to be invoked on the Animal object.
+- serves as the entrypoint for double dispatch ( the runtime part of it )
+
+class Animal {
+    abstract void accept(AnimalVisitor v);
+}
+
+part 3. implement accept() in each subclass
+- binds the linkage for that concrete type to it's visit()
+- solves the problem of using instanceof
+
+class Dog extends Animal {
+    void accept(AnimalVisitor v) {
+        v.visit(this); // compile-time safe, resolved at compile-time
+    }
+
+    void bark() { ... }
+}
+
+class Cat extends Animal {
+    void accept(AnimalVisitor v) {
+        v.visit(this);
+    }
+
+    void meow() { ... }
+
+    void bath() { ... }
+}
+
+part 4. implement each concrete operation
+
+class FeedingVisitor implements AnimalVisitor {
+    public void visit(Dog d) { d.bark(); }
+    public void visit(Cat c) { c.meow(); }
+}
+
+part 5. Use it
+
+Animal a = new Dog();
+a.accept(new FeedingVisitor());
+
+- runtime chooses Dog.accept() ( via a.accept() )
+- compile time chooses visit(Dog) in FeedingVisitor
+- no instanceof, no down casting.
+NOTE: this runtime and compile time interaction together is called "dynamic dispatch"
+
+
+Now, how to add more operations independently in any subclass
+
+consider,
+
+class WashingVisitor implements AnimalVisitor {
+    public void visit(Dog d) { NOOP } // no need to write if already default method in AnimalVisitor to have fail-fast
+    public void visit(Cat c) { c.bath(); }
+}
+
+Animal a = new Cat();
+a.accept(new WashingVisitor()); // calls bath() in Cat class
+
+Hence, use Visitor when, limited number of subclasses ( types ) exist.
+but the operations within a type can be huge and un-connected.
+
+
+
