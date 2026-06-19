@@ -5,7 +5,7 @@
 5. Reachability and WeakReference
 
 
-VarHandle :- class that provides low level atomic operations like CAS etc to perform refleciotn like fucntioanlity in a multi-threaded concurrent environnment. it is thread safe for having refleciotn like access. 
+VarHandle :- class that provides low level atomic operations like CAS etc to perform reflection like functionality in a multi-threaded concurrent environment. it is thread safe for having reflection like access.
 
 
 

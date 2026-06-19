@@ -190,7 +190,7 @@ public class Templates {
             int u = q.poll();
             for (int v : g[u]) {
                 if (!vis[v]) {
-                    vis[v] = true;
+                    vis[v] = true; // update visited inside if only
                     q.add(v);
                 }
             }
@@ -358,67 +358,67 @@ public class Templates {
     // ---------------------------
     // 14) LRU Cache (HashMap + Doubly Linked List)
     // ---------------------------
-    static class LRUCache {
-        static class Node {
-            int key, val;
-            Node prev, next;
-            Node(int k, int v) { key = k; val = v; }
-        }
-
-        private final int cap;
-        private final Map<Integer, Node> map = new HashMap<>();
-        private final Node head = new Node(-1, -1); // dummy
-        private final Node tail = new Node(-1, -1); // dummy
-
-        public LRUCache(int capacity) {
-            this.cap = capacity;
-            head.next = tail;
-            tail.prev = head;
-        }
-
-        public int get(int key) {
-            Node node = map.get(key);
-            if (node == null) return -1;
-            moveToFront(node);
-            return node.val;
-        }
-
-        public void put(int key, int value) {
-            Node node = map.get(key);
-            if (node != null) {
-                node.val = value;
-                moveToFront(node);
-                return;
-            }
-            if (map.size() == cap) {
-                Node lru = tail.prev;
-                remove(lru);
-                map.remove(lru.key);
-            }
-            Node nn = new Node(key, value);
-            addFront(nn);
-            map.put(key, nn);
-        }
-
-        private void moveToFront(Node node) {
-            remove(node);
-            addFront(node);
-        }
-
-        private void addFront(Node node) {
-            Node a = head.next;
-            head.next = node;
-            node.prev = head;
-            node.next = a;
-            a.prev = node;
-        }
-
-        private void remove(Node node) {
-            Node p = node.prev, n = node.next;
-            p.next = n;
-            n.prev = p;
-        }
-    }
+//    static class LRUCache {
+//        static class Node {
+//            int key, val;
+//            Node prev, next;
+//            Node(int k, int v) { key = k; val = v; }
+//        }
+//
+//        private final int cap;
+//        private final Map<Integer, Node> map = new HashMap<>();
+//        private final Node head = new Node(-1, -1); // dummy
+//        private final Node tail = new Node(-1, -1); // dummy
+//
+//        public LRUCache(int capacity) {
+//            this.cap = capacity;
+//            head.next = tail;
+//            tail.prev = head;
+//        }
+//
+//        public int get(int key) {
+//            Node node = map.get(key);
+//            if (node == null) return -1;
+//            moveToFront(node);
+//            return node.val;
+//        }
+//
+//        public void put(int key, int value) {
+//            Node node = map.get(key);
+//            if (node != null) {
+//                node.val = value;
+//                moveToFront(node);
+//                return;
+//            }
+//            if (map.size() == cap) {
+//                Node lru = tail.prev;
+//                remove(lru);
+//                map.remove(lru.key);
+//            }
+//            Node nn = new Node(key, value);
+//            addFront(nn);
+//            map.put(key, nn);
+//        }
+//
+//        private void moveToFront(Node node) {
+//            remove(node);
+//            addFront(node);
+//        }
+//
+//        private void addFront(Node node) {
+//            Node a = head.next;
+//            head.next = node;
+//            node.prev = head;
+//            node.next = a;
+//            a.prev = node;
+//        }
+//
+//        private void remove(Node node) {
+//            Node p = node.prev, n = node.next;
+//            p.next = n;
+//            n.prev = p;
+//        }
+//    }
 
     // ---------------------------
     // 15) BONUS: Disjoint Set Union (Union-Find) - handy
@@ -446,4 +446,96 @@ public class Templates {
             return true;
         }
     }
+
+    static class LRUCache {
+        static class Node {
+            int key, value;
+            Node prev, next;
+
+            Node(int key, int value) {
+                this.key = key;
+                this.value = value;
+            }
+        }
+
+        private final int cap;
+        private final Map<Integer, Node> map;
+        private final Node head, tail;
+
+        LRUCache(int capacity) {
+            this.cap = capacity;
+            this.map = new HashMap<>(capacity);
+            this.head = new Node(-1, -1);
+            this.tail = new Node(-1, -1);
+
+            head.next = tail;
+            tail.prev = head;
+        }
+
+        int get(int key) {
+            Node node = map.get(key);
+            if (node == null) {
+                return -1;
+            }
+            moveToFront(node);
+            return node.value;
+        }
+
+        void put(int key, int value) {
+            Node node = map.get(key);
+            if (node != null) {
+                node.value = value;
+                moveToFront(node);
+                return;
+            }
+            if (map.size() == cap) {
+                Node lru = getLru();
+                remove(lru);
+                map.remove(lru.key);
+            }
+            Node nn = new Node(key, value);
+            addFront(nn);
+            map.put(key, nn);
+        }
+
+        void moveToFront(Node node) {
+            remove(node);
+            addFront(node);
+        }
+
+        void addFront(Node node) {
+            Node old = head.next;
+            head.next = node;
+            node.prev = head;
+            old.prev = node;
+            node.next = old;
+        }
+
+        void remove(Node node) {
+            Node next = node.next;
+            Node prev = node.prev;
+            next.prev = prev;
+            prev.next = next;
+        }
+
+        Node getLru() {
+            return tail.prev;
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
