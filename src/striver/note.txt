@@ -1,0 +1,256 @@
+How to approach a LLD interview:
+
+
+Step 1: Clarify requirements:
+
+Functional ( behavior)
+-> core features and functionality
+-> main features, workflows, business constraints
+
+Key points:
+1. foucs on main feat.
+2. identify constraints, business rules
+------------------------------------------------------------------------------------------------
+Non fucntional ( charactersitcs )
+performance and scale
+SLAS: ( scalability, latency ( how fast to response ), avaialhity ( any downtime acceptable ) , securty( auth, autoz, data seurity )
+
+Kye poitns:
+1. metrics defining sys perf.
+2. scalabiltiy, relaibilty, perfo
+3. focus on how well sys can handle scale
+------------------------------------------------------------------------------------------------
+Hero use case ( primary use case )
+
+1. define "most critical & frequent paths" through syst
+
+key:
+1. identify "primary user", "actions" that occur most frequ
+2. these usecases deinfe the core func.
+3. should be clear and error free
+
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+Step 2: Identify core entities
+
+-> primary "objects" that derive the "functionality" and "structure" of the system
+
+------------------------------------------------------------------------------------------------
+A. Core domain entities
+
+1. key components that the sys will interact with
+2. each has its own lifecycle, attributes, responsibilities
+
+key:
+1. identify entity
+2. clarify role for each entity
+3. avoid introducing too many entity
+------------------------------------------------------------------------------------------------
+
+B. Attributes ( data fields ), Responsibilities ( methods ), Relationships b/w entities
+
+1. relationships: how entities interact with each other
+------------------------------------------------------------------------------------------------
+
+C. Supporting entities
+
+1. to provide additional context, not part of the core system
+2. eg: PaymentFee in parking lot system.
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+Step 3: Visualize interaction flows:
+
+1. how components interact with each other and with external system
+2. how user interact with the system ( very important )
+
+- clarify data flow, requests, sequence of actions
+- seq flow/ flow charts to show inter. ( 2 types):
+    1. internal sys inter.
+    2. external sys inter.
+
+key: show order of operations
+------------------------------------------------------------------------------------------------
+
+System interaction with user:
+
+1. all key user actions like logging, making purchase, submitting form
+2. to have good user interface
+
+key points:
+1. identify "all" user interactions that will trigger system response
+2. map out how system will behave
+3. ensure system feedback is clear
+------------------------------------------------------------------------------------------------
+
+External system calls:
+
+1. Account for interaction with external system calls
+2. for extending the sys capabilities
+
+eg: payment gateway, notifications
+
+key:
+1. define "all external systems" for interaction
+2. ensure secure interaction with system
+3. account for latency, failure, fallback mechanisms
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+Step 4: Define class structure and Relationships
+
+A. OOP and SOLID principles:
+
+- how the classes should be structured and interact
+key:
+1. OOP for structuring code and defining responsibilities
+2. SOLID for scale and maintain
+------------------------------------------------------------------------------------------------
+
+B. (interface, abstract class) for contract and behavior, concrete impl classes
+
+1. controller layer: for user req.
+2. service layer
+3. repo layer
+4. domain models
+
+to separate concerns.
+
+key:
+1. interface: for contracts
+2. abstract class : for behavior
+3. concrete class: for actual logic based on above 2
+------------------------------------------------------------------------------------------------
+
+C. design principles for scale and extensibility
+
+1. 2 principles: loose coupling, high cohesion
+2. abstractions for third party integrations
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+Step 5: Define Core Use case and Methods:
+
+- at this point, system arch and class arch is defined already
+- now focus on core use case and methods
+
+A. for each major feature, define:
+1. major responsibilities ( each method to have a clear resp )
+2. I/O models for use input, output
+3. collaborating classes: ( eg, controller, service layer etc. )
+4. detail transaction flow ( how data moves through the layers )
+
+------------------------------------------------------------------------------------------------
+
+B. [ important ]: Include 3 types of use cases based on need :
+
+1. CRUD: every system can do this on the data
+2. Real-time flows: eg seat locking, updating status in e comm. handled with timely care and execution
+3. background tasks: run async in background like sending emails. Not user facing typically, don't block user interactions
+
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+Step 6: Apply design patterns:
+
+- code is based on best practices and each to extend/maintain
+
+A. which design pattern to use and why:
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+Step 7. handle edge case:
+
+A. discuss edge cases, failure scenarios, system limits:
+
+1. concurrency issues: for shared resource by various threads, race conditions
+2. state management: for inconsistent state due to partial updates or failures.
+3. partial failures: handle them gracefully
+4. retry and idempotency: without side effects of retry need idempt
+------------------------------------------------------------------------------------------------
+
+B. discuss mitigation strategies for above edge cases:
+
+1. locks ( for concurrent operations ) , cache invalidation, compensation ( to reverse partial updates )
+2. [ important ] consistency vs availability tradeoffs: ( balance them for sys perf. )
+
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+step 8: class diagram, package structure:
+
+A. class diagram:
+1. classes: ( for entities )
+2. attributes
+3. methods
+4. relationships ( inheritance, aggregation, composition )
+------------------------------------------------------------------------------------------------
+
+B. package structure:
+
+for modularity, maintainability of related classes together
+
+organize by either:
+1. layered structure ( controller...domain )
+2. feature -based : by features like user management, payment etc. )
+3. utility or helper packages
+
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+Step 9: discuss future add ons:
+
+A. identify potential add ons
+
+1. integration with third party
+2. scale enhancements
+3. new functionalities
+
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+important points:
+
+1. dont get lost in unnecessary details
+2. focus on design and arch duirng discussion.
+3. use sudo code to descibe algorithms, logic if needed
+4. describe how would you implement business logic in servie layer
+5. focus on system design rather than detailed business logic
+------------------------------------------------------------------------------------------------
+
+patterns to use:
+
+1. strategy: logic.
+2. factory : object creation
+3. observer: event handling like notification sys
+4. repository : data access operations
+5. adapter : third party integrations
+
+justify them
+------------------------------------------------------------------------------------------------
+
+judged on:
+
+1. handling edge case and failure scenarios
+2. OOP, SOLID principles.
+3. system design
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
