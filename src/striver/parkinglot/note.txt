@@ -111,7 +111,7 @@ ruleType: enum (flat, hourly)
 7. Payment
 
 id: UUID (pk)
-receiptId: (FK)
+ticketId: (FK) ( correction in image required, not doing )
 amount: double
 gateway: enum
 status: enum
@@ -130,6 +130,14 @@ success: boolean
 receipt: Receipt
 message: String
 ------------------------------------------------------------------------------------------------
+
+at this point, write code for all the domain entities, initialize their fields, and their default constructor, and some other methods in domain classes, if you need, or you can write them on the go
+------------------------------------------------------------------------------------------------
+
+Step 3: Discuss interaction flow ( for converting business into design patterns )
+
+
+
 
 
 
