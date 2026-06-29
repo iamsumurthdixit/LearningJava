@@ -11,9 +11,17 @@ Key points:
 1. foucs on main feat.
 2. identify constraints, business rules
 ------------------------------------------------------------------------------------------------
-Non fucntional ( charactersitcs )
+Non fucntional ( charactersitcs ) ( usually for HLD round )
 performance and scale
-SLAS: ( scalability, latency ( how fast to response ), avaialhity ( any downtime acceptable ) , securty( auth, autoz, data seurity )
+SCALES: ( scalability, latency ( how fast to response ), avaialhity ( any downtime acceptable ) , securty( auth, autoz, data seurity )
+
+Scalability:
+Consistency:
+Availability:
+Latency:
+Extensibility:
+Security:
+
 
 Kye poitns:
 1. metrics defining sys perf.
@@ -28,7 +36,10 @@ key:
 1. identify "primary user", "actions" that occur most frequ
 2. these usecases deinfe the core func.
 3. should be clear and error free
+------------------------------------------------------------------------------------------------
 
+Edge cases: ( very important, tell yourself, discuss them )
+- but keep simple,
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
 

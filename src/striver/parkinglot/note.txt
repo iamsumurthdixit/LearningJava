@@ -1,0 +1,168 @@
+parking lot system design:
+
+
+STEP 1:
+
+
+Functional req:
+
+
+Entry flow:
+
+1. vehicle arrives at gate
+2. generate ticket and assign slot based on vehicle type
+3. mark slot as occupied
+4. return entry result with status
+
+Exit flow:
+
+1. user presents ticket at exit
+2. calculate fee based on pricing rules (like min of hourly, flat etc. )
+3. process payment through payment gateway
+4. generate receipt and mark slot unoccupied
+5. return exit result with status
+
+Admin flow / configurations :
+
+1. CRUD on floors, slots
+2. define pricing rules based on vehicle type
+3. update pricing fee ( flat, hourly )
+4. view current parking status
+
+------------------------------------------------------------------------------------------------
+
+Non functional req: ( HLD focused )
+
+
+Scalability: must support multiple parking lot and thousands of slots
+
+Consistency: strong consistency for slot allocation and release
+
+Availability: HA for entry/exit gate even during payment failure
+
+Latency: low latency ( < 500ms ) for ticket generation and payment processing
+
+Extensibility: easily add new vehicle types, pricing strategies, gateways
+
+Security: RBAC for admin actions
+
+------------------------------------------------------------------------------------------------
+
+
+Edge cases:
+
+1. payment failure during exit - retry and hold slot
+
+2. ticket lost - allow admin override
+
+3. clock skew ( IMPT ) - system time validation for all servers worldwide
+
+4. slot state mismatch  - periodic reconciliation ( slot showing occupied, but still empty )
+
+------------------------------------------------------------------------------------------------
+
+
+STEP 2: Identify core entities
+
+
+1. Vehicle
+
+id: UUID (pk)
+licensePlate: String
+vehicleType: Enum ( CAR, BIKE, TRUCK, EV )
+
+2. ParkingSlot
+
+id: UUID (pk)
+slotType: Enum
+isOccupied: boolean
+floorNumber: int
+
+3. Floor
+
+id: UUID (pk)
+number: int
+slots: List<ParkingSlot>
+
+4. Ticket ( is the relation b/w slot and vehicle based on vehicle type )
+
+id: UUID (pk)
+vehicleId: (FK)
+slotId: (FK)
+entryTime: Timestamp
+isActive: boolean
+
+5. Receipt ( after payment, ticket is used to generate receipt )
+
+id: UUID (pk)
+ticketId: (FK)
+exitTime: Timestamp
+totalFee: (based on pricing rule)
+paymentStatus: SUCCESS, FAILED, PENDING
+
+6. PricingRule
+
+id: UUID (pk)
+vehicleType: enum
+ratePerHour: double
+flatRate: double
+ruleType: enum (flat, hourly)
+
+7. Payment
+
+id: UUID (pk)
+receiptId: (FK)
+amount: double
+gateway: enum
+status: enum
+
+DTO
+
+1. EntryResult
+
+success: boolean
+ticket: Ticket
+message: String
+
+2. ExitResult
+
+success: boolean
+receipt: Receipt
+message: String
+------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
