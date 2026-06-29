@@ -136,6 +136,189 @@ at this point, write code for all the domain entities, initialize their fields, 
 
 Step 3: Discuss interaction flow ( for converting business into design patterns )
 
+==> showing the thinking to convert the flow into class:
+
+
+1. Entry flow:
+
+-> driver enters, gets a slot (based on vehicle type), gets a ticket
+
+=> here, ( gets a slot ) means that a class that manages the slot ( using SRP ), similarly for (gets a ticket) means a class that manages the ticket, using SRP
+
+
+
+2. Exit flow:
+
+-> driver exit, shows the ticket, price computed ( based on min of pricing ), pay's the amount ( with retries if it fails ), gets the receipt, slot released, ticket deactivated to avoid re-entry
+
+=> (shows the ticket) means verifying ticket is valid or not etc. , ( using SRP, a class that manages Ticket )
+(price computed ) means that i need something pricing kind of thing (Payment) to compute the price
+(paying with retry) means a manager that takes care with retryable payments
+(gives the receipt ) means 1 more class that gives the receipt
+(slot released ) can be done the slot manager
+(ticket deactivated ) can be done by the ticket class
+
+
+3. Admin flow:
+
+-> admin add slots, floors, update pricing
+=> can all be done as 1 admin class only, since behavior attached to admin
+
+
+Don't code them yet. first discuss them in step 4
+------------------------------------------------------------------------------------------------
+
+
+Step 4: Discuss class structures and class relationships
+
+
+NOTE: don't add classes to just 1 package, keep them separate based on architectures
+
+ARCH LAYERS:
+
+client/UI -> Controller layer ( entrypoint: HTTP/API) -> Service layer ( business logic ) -> Repository layer -> domain layer
+
+
+Controllers: (entrypoint):
+
+NOTE: if you have less number of arguments, avoid DTOs in interview.
+
+1. EntryController
+- method: EntryResult enterVehicle(String licensePlate, VehicleType type) // having separate args to demonstrate vehicle creation
+
+2. ExitController
+- ExitResult(UUID ticketId)
+
+3. AdminController
+- multiple methods
+
+NOTE: business logic is the easiest part to do in LLD interview, design is the most important part
+
+at this point, just create the controller, default constructor and their dependencies.
+
+
+
+
+Service layers (very simple based on the flow), write method names.
+
+1. TicketService
+- Ticket generateTicket(Vehicle, ParkingSlot)
+- Ticket getTicket(ticketId)
+
+2. SlotService
+- ParkingSlot allocateSlot(VehicleType)
+- void releaseSlot(slotId)
+
+3. PricingService ( for price computation )
+- double calculateFee(ticketId) // based on pricing fee, return amount to pay
+
+4. PaymentService
+- boolean processPayment(ticketId, amount)
+
+5. ReceiptService
+- Receipt generateReceipt(ticket, fee, paymentSuccess)
+
+6. AdminService
+- void addFloor(int floorNumber)
+- void addSlot(int floorNumber, Slot slot)
+- void updatePricing(VehicleType, ratePerHour, fixedRate)
+- void updateFlatPricing, updateHourlyPricing
+
+
+
+
+
+Repository Layer:
+
+NOTE: typically for this, try to connect with the service layer, NOT with the domain layer
+
+1. TicketRepository
+- void save(Ticket)
+- Ticket findById(ticketId)
+- List<Ticket> findActiveTickets()
+- void deactivateTicket(ticketId)
+
+2. SlotRepository
+- void save(Slot)
+- ParkingSlot findById(slotId)
+- ParkingSlot findAvailableSlot(VehicleType)
+
+3. FloorRepository ( use only for floor )
+- void save
+- Floor findByFloorNumber(int number)
+
+4. PricingRepository
+- void save
+- PricingRule findByVehicleType(Veh.Type)
+
+5. PaymentRepository
+- void save(Payment)
+- Payment findByTicketId(ticketId)
+
+
+Since we have 3 party integration ( payment ), using adapter pattern
+
+
+Interfaces:
+
+1. PaymentGatewayAdapter
+- boolean pay(UUID ticketId, double amount)
+
+impls: RayzorpayAdaptor, StripeAdapter
+
+------------------------------------------------------------------------------------------------
+
+
+At this point, just write skeleton for service layer, just the methods and init dependencies, them similarly for repository. just write method defined above, their args etc. not method bodies.
+
+
+replicate DB tables with Map (concurrent )
+
+now code for adapters
+
+
+at this point, all the skeleton code should be done, all methods in place, all dependencies initialized etc. just method body required. ( most likely for service layers only). repository, adapter layer methods should also be completed.
+
+
+Use constructor injection
+------------------------------------------------------------------------------------------------
+
+
+Step 5: Core use cases and methods:
+
+-> here, trying to get the interaction flow in terms of business logic
+
+
+1. Entry use case
+
+enterVehicle() -> SlotService.allocateSlot() -> TicketService.generateTicket() -> TicketRepository.save() -> return EntryResult
+
+
+2. Exit use case
+
+exitVehicle() -> TicketRepository.getTicket() -> PricingService.calculateFee() -> PaymentService.processPayment() -> PaymentGatewayAdapter.pay() -> SlotService.releaseSlot() -> ReceiptService.generateReceipt() -> return ExitResult
+
+
+3. Admin use case
+
+addFloor() ->
+addSlot() ->
+updatePricing -> PricingRepository.save()
+
+
+NOTE: based on these flows, you will determine that which dependencies are required by the controller, and then you can constructor init them.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
